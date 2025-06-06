@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { auth, setupRecaptcha } from '../lib/firebase';
 import { signInWithPhoneNumber } from 'firebase/auth';
 import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/router';
 
 // Set up Supabase client
 const supabase = createClient(
@@ -14,6 +15,8 @@ export default function Login() {
   const [code, setCode] = useState('');
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [error, setError] = useState('');
+  const router = useRouter();
+  const { role } = router.query;
 
   const sendOTP = async () => {
     setError('');
@@ -27,30 +30,38 @@ export default function Login() {
   };
 
   const verifyCode = async () => {
-    setError('');
-    try {
-      await confirmationResult.confirm(code);
-      // Auth success - now query Supabase for user data
-      const { data, error } = await supabase
-        .from('goodcashew_users')
-        .select('*')
-        .eq('phone_number', phone)
-        .single();
+  setError('');
+  try {
+    await confirmationResult.confirm(code);
+    // Auth success - now query Supabase for user data
+    const { data, error } = await supabase
+      .from('goodcashew_users')
+      .select('*')
+      .eq('phone_number', phone)
+      .single();
 
-      if (error || !data) {
-        setError('User not found in Supabase');
+    if (error || !data) {
+      setError('User not found in Supabase');
+    } else {
+      if (data.role === 'farmer') {
+        router.push('/dashboard/farmer');
+      } else if (data.role === 'extension_worker') {
+        router.push('/dashboard/extension');
+      } else if (data.role === 'admin') {
+        router.push('/dashboard/admin');
       } else {
-        console.log('User profile:', data);
-        // Redirect or display dashboard here
+        setError('Unknown user role.');
       }
-    } catch (err) {
-      setError('Invalid code or login failed.');
     }
-  };
+  } catch (err) {
+    setError('Invalid code or login failed.');
+  }
+};
+
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <h1 className="text-xl font-bold mb-4">GoodCashew Login</h1>
+      <h1 className="text-xl font-bold mb-4">Login as {role ? role.replace('_', ' ') : 'user'}</h1>
       <div id="recaptcha-container"></div>
 
       {!confirmationResult ? (
