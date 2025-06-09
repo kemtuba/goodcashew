@@ -1,50 +1,92 @@
 // app/(dashboard)/layout.tsx
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient'; // Make sure this path is correct
 
-// Import your updated Header and Sidebar
+// Import shared components
 import { Header } from '@/components/sections/dashboard/Header';
-import { Sidebar } from '@/components/ui/sidebar'; // Assuming your sidebar logic is here
+import { Sidebar } from '@/components/ui/sidebar';
 
-// Assuming these types are defined in a central file like `/types.ts`
-type UserRole = "farmer" | "extension-worker" | "coop-leader" | "admin" | "retailer";
-type Language = "en" | "twi" | "nafana" | "fr";
-
+// Import shared types from your central types file
+import type { UserRole, Language } from '@/lib/types';
 
 /**
- * DashboardLayout provides a consistent wrapper for all pages within the (dashboard) route group.
- * The logic for the mobile menu has been moved into the Header component itself.
- * This layout now only needs to arrange the Sidebar, Header, and page content.
+ * This DashboardLayout is a "client" component that acts as a secure wrapper.
+ * It fetches the user's session and profile to ensure they are authenticated
+ * before rendering the dashboard content. It also provides real user data to its children.
  */
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // In a real application, you would fetch the current user's role and language
-  // from your authentication state (e.g., Supabase session).
-  // For now, we can use placeholder values.
-  const currentUserRole: UserRole = "farmer"; // Placeholder
-  const currentLanguage: Language = "en"; // Placeholder
+  const router = useRouter();
+
+  // State to hold the user's role and loading status
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUserProfile = async () => {
+      // 1. Get the current user session from Supabase Auth
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      // 2. If no session, the user is not logged in. Redirect them.
+      if (sessionError || !session) {
+        router.push('/login');
+        return;
+      }
+      
+      // 3. Fetch the user's profile from your `goodcashew_users` table
+      //    to get their specific roles.
+      const { data: profile, error: profileError } = await supabase
+        .from('goodcashew_users')
+        .select('roles')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (profileError || !profile || !profile.roles || profile.roles.length === 0) {
+        // Handle case where user is authenticated but has no profile/role
+        console.error("Could not find user profile or roles.");
+        router.push('/login'); // Or a "profile incomplete" page
+        return;
+      }
+      
+      // 4. Set the user's role (for simplicity, we take the first role)
+      setUserRole(profile.roles[0]);
+      setLoading(false);
+    };
+
+    getUserProfile();
+  }, [router]);
+
+  // While fetching the user's data, show a loading state.
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div>Loading Dashboard...</div>
+      </div>
+    );
+  }
+
+  // This check is important. If, after loading, we still don't have a role,
+  // we don't render the dashboard.
+  if (!userRole) {
+    return null; // Or render an error message
+  }
 
   return (
     <div className="flex h-screen w-full bg-gray-100 dark:bg-gray-800">
-      {/* --- Desktop Sidebar --- */}
-      {/* This remains the same: a static sidebar for larger screens. */}
       <div className="hidden md:flex md:flex-shrink-0">
         <Sidebar />
       </div>
       
-      {/* --- Main Content Area --- */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/*
-          * FIXED: We now pass the required `language` and `userRole` props to the Header.
-          * The `onMenuClick` prop is removed because the new Header handles its own mobile menu state.
-        */}
-        <Header language={currentLanguage} userRole={currentUserRole} />
-
-        {/* The `main` tag is where the actual page content (`children`) will be displayed. */}
+        {/* We now pass the dynamically fetched userRole to the Header */}
+        <Header language={"en"} userRole={userRole} />
+        
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           {children}
         </main>

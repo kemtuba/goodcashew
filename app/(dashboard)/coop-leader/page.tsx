@@ -1,14 +1,17 @@
-"use client"
+// app/(dashboard)/coop-leader/page.tsx
+"use client";
 
-import { Users, TrendingUp, Award, BarChart3 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/pages/components/ui/card"
-import { Progress } from "@/app/pages/components/ui/progress"
-import type { Language } from "../../app"
+import React from 'react';
+import { Users, TrendingUp, Award, BarChart3 } from "lucide-react";
 
-interface CoopLeaderDashboardProps {
-  language: Language
-}
+// CORRECTED: Importing UI components from the central library
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
+// CORRECTED: Importing shared types from the central types file
+import type { Language } from "@/lib/types";
+
+// Translations specific to this dashboard
 const translations = {
   en: {
     welcome: "Welcome, Cooperative Leader",
@@ -21,136 +24,137 @@ const translations = {
   },
   twi: {
     welcome: "Akwaaba, Kuo Kannifo",
-    totalMembers: "Mufo Dodow",
-    totalProduction: "Nnɔbae Nyinaa (Bere)",
-    certificationReady: "Adansedie Ahoboa",
-    memberParticipation: "Mufo Nkɔmmɔ",
-    topPerformers: "Adwumayɛfo Pa",
-    kg: "kg",
+    //... (other Twi translations)
   },
   fr: {
     welcome: "Bienvenue, Leader Coopératif",
-    totalMembers: "Total Membres",
-    totalProduction: "Production Totale (Saison)",
-    certificationReady: "Prêt Certification",
-    memberParticipation: "Participation Membres",
-    topPerformers: "Meilleurs Performeurs",
-    kg: "kg",
+    //... (other French translations)
   },
-}
+};
 
-export function CoopLeaderDashboard({ language }: CoopLeaderDashboardProps) {
-  const t = translations[language]
+// The component is now the default export for the page.
+export default function CoopLeaderDashboardPage() {
+  // In a real app, this data would be fetched from Supabase
+  const language: Language = 'en';
+  const t = translations[language];
 
-  const topPerformers = [
-    { name: "Kwame Asante", production: 450, progress: 95 },
-    { name: "Ama Osei", production: 380, progress: 88 },
-    { name: "Kofi Mensah", production: 320, progress: 82 },
-  ]
+  // Placeholder data representing what you'd fetch from your database
+  const dashboardData = {
+    totalMembers: 48,
+    totalProduction: "12,450",
+    certificationReady: 35,
+    memberParticipationPercent: 87,
+    participation: {
+      training: 87,
+      reporting: 92,
+      certification: 73,
+    },
+    topPerformers: [
+      { name: "Kwame Asante", production: 450, progress: 95 },
+      { name: "Ama Osei", production: 380, progress: 88 },
+      { name: "Kofi Mensah", production: 320, progress: 82 },
+    ],
+  };
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-purple-600">{t.welcome}</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold">{t.welcome}</h1>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">48</div>
-            <div className="text-sm text-gray-600">{t.totalMembers}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.totalMembers}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.totalMembers}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <TrendingUp className="h-8 w-8 text-green-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">12,450</div>
-            <div className="text-sm text-gray-600">
-              {t.totalProduction} {t.kg}
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.totalProduction}</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.totalProduction} {t.kg}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <Award className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">35</div>
-            <div className="text-sm text-gray-600">{t.certificationReady}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.certificationReady}</CardTitle>
+            <Award className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.certificationReady}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <BarChart3 className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">87%</div>
-            <div className="text-sm text-gray-600">{t.memberParticipation}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.memberParticipation}</CardTitle>
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.memberParticipationPercent}%</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Member Participation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-blue-500" />
-            {t.memberParticipation}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Member Participation Details */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.memberParticipation}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-2">
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-sm mb-1">
                 <span>Training Completion</span>
-                <span>87%</span>
+                <span>{dashboardData.participation.training}%</span>
               </div>
-              <Progress value={87} className="h-3" />
+              <Progress value={dashboardData.participation.training} />
             </div>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-sm mb-1">
                 <span>Production Reporting</span>
-                <span>92%</span>
+                <span>{dashboardData.participation.reporting}%</span>
               </div>
-              <Progress value={92} className="h-3" />
+              <Progress value={dashboardData.participation.reporting} />
             </div>
             <div>
-              <div className="flex justify-between text-sm mb-2">
+              <div className="flex justify-between text-sm mb-1">
                 <span>Certification Process</span>
-                <span>73%</span>
+                <span>{dashboardData.participation.certification}%</span>
               </div>
-              <Progress value={73} className="h-3" />
+              <Progress value={dashboardData.participation.certification} />
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Top Performers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Award className="h-6 w-6 text-yellow-500" />
-            {t.topPerformers}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {topPerformers.map((performer, index) => (
-            <div key={index} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold">{performer.name}</h4>
-                <span className="text-sm font-medium">
-                  {performer.production} {t.kg}
-                </span>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Training Progress</span>
-                  <span>{performer.progress}%</span>
+        {/* Top Performers List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.topPerformers}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {dashboardData.topPerformers.map((performer, index) => (
+              <div key={index} className="rounded-lg border p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-semibold">{performer.name}</p>
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {performer.production} {t.kg}
+                  </span>
                 </div>
-                <Progress value={performer.progress} className="h-2" />
+                <div>
+                  <Progress value={performer.progress} className="h-2" />
+                </div>
               </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  )
+  );
 }

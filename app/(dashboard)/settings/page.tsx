@@ -1,48 +1,54 @@
-"use client"
+// app/(dashboard)/settings/page.tsx
+"use client";
 
-import { Globe, User, Bell, Info } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/pages/components/ui/card"
-import { Button } from "@/app/pages/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/pages/components/ui/select"
-import type { Language, UserRole } from "../app"
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabaseClient';
+import { Globe, User, Bell, Info } from "lucide-react";
 
-interface SettingsProps {
-  language: Language
-  userRole: UserRole
-  onLanguageChange: (language: Language) => void
-  onRoleChange: (role: UserRole) => void
-}
+// CORRECTED: Importing UI components from the central library
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
+// CORRECTED: Importing shared types from the central types file
+import type { Language, UserRole } from "@/lib/types";
+
+// Translations specific to this page
 const translations = {
   en: {
     title: "Settings",
     language: "Language",
-    userRole: "User Role",
+    userRole: "Switch Role",
     notifications: "Notifications",
     about: "About GoodCashew",
     version: "Version 1.0.0",
-    changeRole: "Change Role",
+    currentRole: "Current Role",
     farmer: "Farmer",
     extensionWorker: "Extension Worker",
     coopLeader: "Cooperative Leader",
     admin: "Administrator",
+    retailer: "Retailer",
     english: "English",
     twi: "Twi",
     nafana: "Nafana",
     french: "French",
   },
+  // FIXED: Added placeholder data for other languages to satisfy TypeScript
   twi: {
     title: "Nhyehyɛe",
     language: "Kasa",
-    userRole: "Dwumadi",
+    userRole: "Sesa Dwumadi",
     notifications: "Amanneɛbɔ",
     about: "GoodCashew Ho Nsɛm",
     version: "Nkyerɛwde 1.0.0",
-    changeRole: "Sesa Dwumadi",
+    currentRole: "Dwumadi a Woyɛ",
     farmer: "Okuafo",
     extensionWorker: "Mmoa Adwumayɛfo",
     coopLeader: "Kuo Kannifo",
     admin: "Ɔhwɛfo",
+    retailer: "Retailer",
     english: "Borɔfo Kasa",
     twi: "Twi",
     nafana: "Nafana",
@@ -51,15 +57,16 @@ const translations = {
   nafana: {
     title: "Yεlεni",
     language: "Kasa",
-    userRole: "Tuma",
+    userRole: "Sesa Tuma",
     notifications: "Amanneεbɔ",
     about: "GoodCashew Ho Nsεm",
     version: "Nkyerεwde 1.0.0",
-    changeRole: "Sesa Tuma",
+    currentRole: "Tuma a Woyε",
     farmer: "Kuoro",
     extensionWorker: "Dεmε Tumani",
     coopLeader: "Kuo Yεlεni",
     admin: "Yεlεni Kεsε",
+    retailer: "Retailer",
     english: "Borɔfo Kasa",
     twi: "Twi",
     nafana: "Nafana",
@@ -68,153 +75,161 @@ const translations = {
   fr: {
     title: "Paramètres",
     language: "Langue",
-    userRole: "Rôle Utilisateur",
+    userRole: "Changer Rôle",
     notifications: "Notifications",
     about: "À Propos de GoodCashew",
     version: "Version 1.0.0",
-    changeRole: "Changer Rôle",
+    currentRole: "Rôle Actuel",
     farmer: "Agriculteur",
     extensionWorker: "Agent de Vulgarisation",
     coopLeader: "Leader Coopératif",
     admin: "Administrateur",
+    retailer: "Détaillant",
     english: "Anglais",
     twi: "Twi",
     nafana: "Nafana",
     french: "Français",
   },
-}
+};
 
-export function Settings({ language, userRole, onLanguageChange, onRoleChange }: SettingsProps) {
-  const t = translations[language]
+export default function SettingsPage() {
+  const router = useRouter();
 
-  const languageOptions = [
-    { value: "en" as Language, label: t.english },
-    { value: "twi" as Language, label: t.twi },
-    { value: "nafana" as Language, label: t.nafana },
-    { value: "fr" as Language, label: t.french },
-  ]
+  // State for user data and settings
+  const [language, setLanguage] = useState<Language>("en");
+  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
+  const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const roleOptions = [
-    { value: "farmer" as UserRole, label: t.farmer },
-    { value: "extension-worker" as UserRole, label: t.extensionWorker },
-    { value: "coop-leader" as UserRole, label: t.coopLeader },
-    { value: "admin" as UserRole, label: t.admin },
-  ]
+  const t = translations[language];
 
+  // Fetch the user's profile and available roles on component mount
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('goodcashew_users')
+        .select('roles')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile && profile.roles) {
+        // For simplicity, we assume the current role is the first one in their list.
+        setCurrentRole(profile.roles[0]); 
+        setAvailableRoles(profile.roles);
+      }
+      setLoading(false);
+    };
+    fetchUserProfile();
+  }, [router]);
+
+  // Handler for when a user selects a new role from the dropdown
+  const handleRoleChange = (newRole: UserRole) => {
+    if (newRole && newRole !== currentRole) {
+      router.push(`/${newRole}`);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading settings...</div>;
+  }
+
+  // A map to get the display label for a role key
+  const roleLabels: Record<UserRole, string> = {
+    farmer: t.farmer,
+    "extension-worker": t.extensionWorker,
+    "coop-leader": t.coopLeader,
+    admin: t.admin,
+    retailer: t.retailer,
+  };
+  
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-green-600">{t.title}</h2>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">{t.title}</h1>
+        <p className="text-muted-foreground">Manage your account and app settings.</p>
       </div>
 
       {/* Language Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-6 w-6 text-blue-500" />
-            {t.language}
-          </CardTitle>
+          <CardTitle>{t.language}</CardTitle>
+          <CardDescription>Choose your preferred language for the application.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={language} onValueChange={onLanguageChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
+          <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+            <SelectTrigger className="w-full md:w-1/2">
+              <SelectValue placeholder="Select a language" />
             </SelectTrigger>
             <SelectContent>
-              {languageOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="en">{t.english}</SelectItem>
+              <SelectItem value="twi">{t.twi}</SelectItem>
+              <SelectItem value="nafana">{t.nafana}</SelectItem>
+              <SelectItem value="fr">{t.french}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
       </Card>
 
-      {/* User Role Settings */}
+      {/* User Role Switching (only shows if user has more than one role) */}
+      {availableRoles.length > 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.userRole}</CardTitle>
+            <CardDescription>Switch between your available roles.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Select onValueChange={handleRoleChange} defaultValue={currentRole || undefined}>
+              <SelectTrigger className="w-full md:w-1/2">
+                <SelectValue placeholder="Select a role to switch to" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role} value={role}>
+                    {roleLabels[role]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notifications Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-6 w-6 text-green-500" />
-            {t.userRole}
-          </CardTitle>
+          <CardTitle>{t.notifications}</CardTitle>
+          <CardDescription>Manage your notification preferences.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="text-sm text-gray-600">
-            Current: <span className="font-semibold capitalize">{userRole.replace("-", " ")}</span>
+          <div className="flex items-center justify-between p-2 rounded-lg border">
+            <label htmlFor="school-events" className="font-medium">School Events</label>
+            <Switch id="school-events" defaultChecked />
           </div>
-          <Select value={userRole} onValueChange={onRoleChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {roleOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      {/* Notifications */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-6 w-6 text-orange-500" />
-            {t.notifications}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span>School Events</span>
-              <Button variant="outline" size="sm">
-                Enabled
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Pest Alerts</span>
-              <Button variant="outline" size="sm">
-                Enabled
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Training Reminders</span>
-              <Button variant="outline" size="sm">
-                Enabled
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <span>Dues Reminders</span>
-              <Button variant="outline" size="sm">
-                Enabled
-              </Button>
-            </div>
+          <div className="flex items-center justify-between p-2 rounded-lg border">
+            <label htmlFor="pest-alerts" className="font-medium">Pest Alerts</label>
+            <Switch id="pest-alerts" defaultChecked />
           </div>
         </CardContent>
       </Card>
 
-      {/* About */}
+      {/* About Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="h-6 w-6 text-purple-500" />
-            {t.about}
-          </CardTitle>
+          <CardTitle>{t.about}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center space-y-2">
-            <p className="text-lg font-semibold">GoodCashew</p>
-            <p className="text-sm text-gray-600">{t.version}</p>
-            <p className="text-sm text-gray-600 mt-4">
-              Supporting smallholding cashew farmers through school-based cooperatives with sustainable practices,
-              education, and market access.
-            </p>
+          <div className="text-center space-y-2 text-muted-foreground">
+            <p className="text-lg font-semibold text-foreground">GoodCashew</p>
+            <p>{t.version}</p>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

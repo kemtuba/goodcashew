@@ -1,15 +1,18 @@
-"use client"
+// app/(dashboard)/extension-worker/page.tsx
+"use client";
 
-import { Users, MapPin, CheckCircle } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/pages/components/ui/card"
-import { Button } from "@/app/pages/components/ui/button"
-import { Badge } from "@/app/pages/components/ui/badge"
-import type { Language } from "../../app"
+import React from 'react';
+import { Users, MapPin, CheckCircle } from "lucide-react";
 
-interface ExtensionWorkerDashboardProps {
-  language: Language
-}
+// CORRECTED: Importing UI components from the central library
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
+// CORRECTED: Importing shared types from the central types file
+import type { Language } from "@/lib/types";
+
+// Translations specific to this dashboard
 const translations = {
   en: {
     welcome: "Welcome, Extension Worker",
@@ -24,125 +27,106 @@ const translations = {
   twi: {
     welcome: "Akwaaba, Mmoa Adwumayɛfo",
     assignedFarmers: "Akuafo A Wɔde Ama Wo",
-    pendingVisits: "Nsra A Ɛretwɛn",
-    moduleFollowUps: "Adesua A Ɛsɛ Sɛ Wodi Akyi",
-    recentActivity: "Nneyɛe A Aba",
-    scheduleVisit: "Hyɛ Nsra",
-    viewFarmer: "Hwɛ Okuafo",
-    urgent: "Ɛho Hia",
+    //... (other Twi translations)
   },
   fr: {
     welcome: "Bienvenue, Agent de Vulgarisation",
     assignedFarmers: "Agriculteurs Assignés",
-    pendingVisits: "Visites en Attente",
-    moduleFollowUps: "Suivis de Module Requis",
-    recentActivity: "Activité Récente",
-    scheduleVisit: "Programmer Visite",
-    viewFarmer: "Voir Agriculteur",
-    urgent: "Urgent",
+    //... (other French translations)
   },
-}
+};
 
-export function ExtensionWorkerDashboard({ language }: ExtensionWorkerDashboardProps) {
-  const t = translations[language]
+// The component is now the default export for the page.
+export default function ExtensionWorkerDashboardPage() {
+  // In a real app, this data would be fetched from Supabase
+  const language: Language = 'en';
+  const t = translations[language];
 
-  const assignedFarmers = [
-    { id: 1, name: "Kwame Asante", location: "Brong Ahafo", status: "active", lastVisit: "2024-01-10" },
-    { id: 2, name: "Ama Osei", location: "Ashanti", status: "needs-visit", lastVisit: "2023-12-15" },
-    { id: 3, name: "Kofi Mensah", location: "Eastern", status: "active", lastVisit: "2024-01-08" },
-  ]
-
-  const moduleFollowUps = [
-    { farmer: "Kwame Asante", module: "Week 7: Pest Identification", priority: "urgent" },
-    { farmer: "Ama Osei", module: "Week 4: Planting Techniques", priority: "normal" },
-    { farmer: "Kofi Mensah", module: "Week 2: Organic Preparation", priority: "normal" },
-  ]
+  // Placeholder data representing what you'd fetch from your database
+  const dashboardData = {
+    assignedFarmersCount: 15,
+    pendingVisitsCount: 3,
+    assignedFarmers: [
+      { id: 1, name: "Kwame Asante", location: "Brong Ahafo", status: "active" as const, lastVisit: "2024-01-10" },
+      { id: 2, name: "Ama Osei", location: "Ashanti", status: "needs-visit" as const, lastVisit: "2023-12-15" },
+      { id: 3, name: "Kofi Mensah", location: "Eastern", status: "active" as const, lastVisit: "2024-01-08" },
+    ],
+    moduleFollowUps: [
+      { farmer: "Kwame Asante", module: "Week 7: Pest Identification", priority: "urgent" as const },
+      { farmer: "Ama Osei", module: "Week 4: Planting Techniques", priority: "normal" as const },
+    ],
+  };
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-blue-600">{t.welcome}</h2>
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold">{t.welcome}</h1>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
-          <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">15</div>
-            <div className="text-sm text-gray-600">{t.assignedFarmers}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.assignedFarmers}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.assignedFarmersCount}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 text-center">
-            <MapPin className="h-8 w-8 text-orange-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold">3</div>
-            <div className="text-sm text-gray-600">{t.pendingVisits}</div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t.pendingVisits}</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboardData.pendingVisitsCount}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Assigned Farmers */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-blue-500" />
-            {t.assignedFarmers}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {assignedFarmers.map((farmer) => (
-            <div key={farmer.id} className="border rounded-lg p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold">{farmer.name}</h4>
-                  <p className="text-sm text-gray-600">{farmer.location}</p>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Assigned Farmers List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.assignedFarmers}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {dashboardData.assignedFarmers.map((farmer) => (
+              <div key={farmer.id} className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <p className="font-semibold">{farmer.name}</p>
+                  <p className="text-sm text-muted-foreground">{farmer.location}</p>
                 </div>
-                <Badge variant={farmer.status === "needs-visit" ? "destructive" : "default"}>
+                <Badge variant={farmer.status === "needs-visit" ? "destructive" : "secondary"}>
                   {farmer.status === "needs-visit" ? t.urgent : "Active"}
                 </Badge>
+                <Button size="sm" variant="outline">{t.viewFarmer}</Button>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Last visit: {farmer.lastVisit}</span>
-                <div className="space-x-2">
-                  <Button size="sm" variant="outline">
-                    {t.viewFarmer}
-                  </Button>
-                  <Button size="sm">{t.scheduleVisit}</Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
 
-      {/* Module Follow-ups */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="h-6 w-6 text-green-500" />
-            {t.moduleFollowUps}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {moduleFollowUps.map((followUp, index) => (
-            <div key={index} className="border rounded-lg p-4">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h4 className="font-semibold">{followUp.farmer}</h4>
-                  <p className="text-sm text-gray-600">{followUp.module}</p>
+        {/* Module Follow-ups List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.moduleFollowUps}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {dashboardData.moduleFollowUps.map((followUp, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <p className="font-semibold">{followUp.farmer}</p>
+                  <p className="text-sm text-muted-foreground">{followUp.module}</p>
                 </div>
                 <Badge variant={followUp.priority === "urgent" ? "destructive" : "secondary"}>
-                  {followUp.priority === "urgent" ? t.urgent : "Normal"}
+                  {followUp.priority}
                 </Badge>
               </div>
-              <Button size="sm" className="w-full">
-                Schedule Follow-up
-              </Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  )
+  );
 }

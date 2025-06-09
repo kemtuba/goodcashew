@@ -35,11 +35,8 @@ const normalizePhoneNumber = (input: string): string => {
 };
 
 const Login = () => {
-  // Check for emulator mode once at the top.
   const isEmulator = process.env.NEXT_PUBLIC_USE_EMULATOR === 'true';
 
-  // Conditionally set initial state based on emulator mode.
-  // This pre-fills the form with your test number and a standard test code.
   const [phone, setPhone] = useState(isEmulator ? '+12012830478' : '');
   const [code, setCode] = useState(isEmulator ? '123456' : '');
   
@@ -51,24 +48,15 @@ const Login = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get('role');
 
-  // A single, combined useEffect for setup logic.
+  // This useEffect now ONLY handles connecting to the emulator.
   useEffect(() => {
-    // Connect to Auth emulator using the explicit environment variable.
     if (isEmulator) {
       try {
         connectAuthEmulator(auth, 'http://127.0.0.1:9099');
         console.log("Firebase Auth emulator connected.");
       } catch (err) {
-        // This catch block prevents errors on fast refresh if already connected.
         console.log('Auth emulator may already be connected.');
       }
-    }
-
-    // Set up reCAPTCHA for production use.
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-      });
     }
   }, [isEmulator]);
 
@@ -76,17 +64,29 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    // UPDATED LOGIC: Only normalize the phone number if NOT in emulator mode.
-    // The emulator test number is assumed to be perfectly formatted.
-    const finalPhone = isEmulator ? phone : normalizePhoneNumber(phone);
-    const verifier = isEmulator ? null : window.recaptchaVerifier;
-
     try {
-      const result = await signInWithPhoneNumber(auth, finalPhone, verifier!);
+      const finalPhone = isEmulator ? phone : normalizePhoneNumber(phone);
+      let verifier;
+
+      if (isEmulator) {
+        // In emulator mode, the verifier is not needed. The SDK has a known
+        // typing issue, so we cast `undefined` to `any` to satisfy the signature.
+        verifier = undefined as any; 
+      } else {
+        // In production, we create the verifier just-in-time.
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            'size': 'invisible',
+          });
+        }
+        verifier = window.recaptchaVerifier;
+      }
+
+      const result = await signInWithPhoneNumber(auth, finalPhone, verifier);
       setConfirmationResult(result);
     } catch (err: any) {
       console.error('OTP send error:', err);
-      setError(err.message || 'Failed to send code. Please check the phone number format.');
+      setError(err.message || 'Failed to send code. Please check your connection or phone number.');
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,6 @@ const Login = () => {
     setError('');
     setLoading(true);
     
-    // UPDATED LOGIC: Same as above, only normalize if not using the emulator.
     const finalPhone = isEmulator ? phone : normalizePhoneNumber(phone);
     const claimedRole = role;
 
@@ -112,7 +111,7 @@ const Login = () => {
       const { data: userProfile, error: supabaseError } = await supabase
         .from('goodcashew_users')
         .select('roles')
-        .eq('phone_number', finalPhone) // Use the conditionally normalized number
+        .eq('phone_number', finalPhone) 
         .single();
 
       if (supabaseError || !userProfile) {
@@ -124,7 +123,6 @@ const Login = () => {
       const authorizedRoles = userProfile.roles as string[] | null;
 
       if (authorizedRoles && authorizedRoles.includes(claimedRole)) {
-        // CORRECTED ROUTE: This now matches your app/(dashboard)/[role] file structure.
         router.push(`/${claimedRole}`);
       } else {
         const roleName = claimedRole.replace(/_/g, ' ');

@@ -2,17 +2,16 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import { Users, Briefcase, Crown, Settings } from "lucide-react";
+import { Users, Briefcase, Crown, Settings, ShoppingCart } from "lucide-react";
 
-// CORRECTED PATHS: These now point to your central UI library
+// Import UI components from their central location
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-// BEST PRACTICE: These types should live in a central file like `types/index.ts`
-export type UserRole = "farmer" | "extension-worker" | "coop-leader" | "admin";
-export type Language = "en" | "twi" | "nafana" | "fr";
+// BEST PRACTICE: Import shared types from the central /lib/types.ts file.
+import type { UserRole, Language } from "@/lib/types";
 
-// All translations are kept here as they are specific to this page's content
+// The translations object is specific to this page, so it's fine to keep it here.
 const translations = {
   en: {
     title: "Welcome to GoodCashew",
@@ -25,6 +24,8 @@ const translations = {
     coopLeaderDesc: "Manage cooperative members and school operations",
     admin: "Administrator",
     adminDesc: "Oversee program data and support onboarding",
+    retailer: "Retailer", // Added retailer for consistency
+    retailerDesc: "Manage product sales and inventory"
   },
   // You can keep your other languages here
   twi: { /* ... */ },
@@ -36,20 +37,21 @@ export default function HomePage() {
   const router = useRouter();
   
   // For this pilot, we can hardcode the language.
-  // This could be dynamic later based on user preference.
   const language: Language = "en"; 
   const t = translations[language];
 
   const handleRoleClick = (role: UserRole) => {
-    // This function now correctly navigates to the login page with the role
+    // This function correctly navigates to the login page with the role
     router.push(`/login?role=${role}`);
   };
 
+  // The roles array now includes all roles defined in your UserRole type.
   const roles = [
     { key: "farmer" as UserRole, label: t.farmer, desc: t.farmerDesc, icon: Users, color: "bg-green-500" },
     { key: "extension-worker" as UserRole, label: t.extensionWorker, desc: t.extensionWorkerDesc, icon: Briefcase, color: "bg-blue-500" },
     { key: "coop-leader" as UserRole, label: t.coopLeader, desc: t.coopLeaderDesc, icon: Crown, color: "bg-purple-500" },
     { key: "admin" as UserRole, label: t.admin, desc: t.adminDesc, icon: Settings, color: "bg-gray-500" },
+    { key: "retailer" as UserRole, label: t.retailer, desc: t.retailerDesc, icon: ShoppingCart, color: "bg-orange-500" },
   ];
 
   return (
@@ -63,8 +65,9 @@ export default function HomePage() {
         <div className="space-y-4">
           {roles.map((role) => {
             const Icon = role.icon;
+            // You can easily remove a role from the UI by filtering it out here if needed
+            // For example: if (role.key === 'retailer') return null;
             return (
-              // The onClick handler is now directly on the Card
               <Card 
                 key={role.key} 
                 className="cursor-pointer hover:shadow-xl transition-shadow duration-300 rounded-lg"

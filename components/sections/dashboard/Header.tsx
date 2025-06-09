@@ -5,12 +5,11 @@ import { useState } from "react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, Home, BookOpen, Wrench, Users, Award, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button"; // Corrected path
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"; // Corrected path
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-// Assuming these types are defined in a central file like `/types.ts`
-type UserRole = "farmer" | "extension-worker" | "coop-leader" | "admin" | "retailer";
-type Language = "en" | "twi" | "nafana" | "fr";
+// Assuming these types are defined in a central file like `/lib/types.ts`
+import type { UserRole, Language } from "@/lib/types";
 
 // The props this component accepts. UserRole and Language can be used for display.
 interface HeaderProps {
@@ -19,7 +18,8 @@ interface HeaderProps {
 }
 
 // All your great translation work is preserved.
-const translations = {
+// FIXED: Added placeholder data for other languages to resolve the type error.
+const translations: Record<Language, any> = {
   en: {
     title: "GoodCashew",
     dashboard: "Dashboard",
@@ -29,9 +29,33 @@ const translations = {
     certification: "Certification",
     settings: "Settings",
   },
-  twi: { /* ... */ },
-  nafana: { /* ... */ },
-  fr: { /* ... */ },
+  twi: { 
+    title: "GoodCashew",
+    dashboard: "Dashboard",
+    education: "Adesua Nhyehyɛe",
+    technical: "Mmoa Teknikal",
+    cooperative: "Kuo Nnwuma",
+    certification: "Adansedie",
+    settings: "Nhyehyɛe",
+  },
+  nafana: { 
+    title: "GoodCashew",
+    dashboard: "Dashboard",
+    education: "Kalanni Yεlε",
+    technical: "Dεmε Teknikal",
+    cooperative: "Kuo Tuma",
+    certification: "Tεntεrεnni",
+    settings: "Yεlεni",
+  },
+  fr: { 
+    title: "GoodCashew",
+    dashboard: "Tableau de Bord",
+    education: "Modules d'Éducation",
+    technical: "Assistance Technique",
+    cooperative: "Services Coopératifs",
+    certification: "Certification",
+    settings: "Paramètres",
+  },
 };
 
 export function Header({ language, userRole }: HeaderProps) {
@@ -45,6 +69,9 @@ export function Header({ language, userRole }: HeaderProps) {
   // The menu items now use an `href` for direct navigation.
   const menuItems = [
     { href: `/${userRole}`, label: t.dashboard, icon: Home }, // Links to the user's main dashboard, e.g., /farmer
+    // In a real app, these routes would need to exist in the /app directory
+    // For example: app/education/page.tsx, app/technical/page.tsx etc.
+    // These could also be part of the (dashboard) group like app/(dashboard)/education/page.tsx
     { href: "/education", label: t.education, icon: BookOpen },
     { href: "/technical", label: t.technical, icon: Wrench },
     { href: "/cooperative", label: t.cooperative, icon: Users },

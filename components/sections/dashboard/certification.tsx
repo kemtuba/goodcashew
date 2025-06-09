@@ -1,18 +1,27 @@
-"use client"
+// components/sections/dashboard/certification.tsx
+"use client";
 
-import { Award, QrCode, MapPin, Calendar, Download, CheckCircle } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/pages/components/ui/card"
-import { Button } from "@/app/pages/components/ui/button"
-import { Badge } from "@/app/pages/components/ui/badge"
-import { Progress } from "@/app/pages/components/ui/progress"
-import type { Language, UserRole } from "../app"
+import React from 'react';
+import { Award, QrCode, MapPin, Calendar, Download, CheckCircle, Users } from "lucide-react";
 
+// CORRECTED: Importing UI components from the central library
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+// CORRECTED: Importing shared types from the central types file
+import type { Language, UserRole } from "@/lib/types";
+
+// Props for the component, including the all-important userRole
 interface CertificationProps {
-  language: Language
-  userRole: UserRole
+  language: Language;
+  userRole: UserRole;
 }
 
-const translations = {
+// Translations specific to this section
+const translations: Record<Language, any> = {
   en: {
     title: "Certification & Traceability",
     certificationStatus: "Certification Status",
@@ -33,7 +42,9 @@ const translations = {
     organic: "Organic",
     fairTrade: "Fair Trade",
     requirements: "Requirements Met",
+    memberCertificationStatus: "Member Certification Status",
   },
+  // FIXED: Added full placeholder data for other languages to resolve the error.
   twi: {
     title: "Adansedie & Nhwehwɛmu",
     certificationStatus: "Adansedie Tebea",
@@ -54,6 +65,7 @@ const translations = {
     organic: "Organic",
     fairTrade: "Fair Trade",
     requirements: "Ahwehwɛde A Wɔadi",
+    memberCertificationStatus: "Member Adansedie Tebea",
   },
   nafana: {
     title: "Tεntεrεnni & Kpεlεni",
@@ -75,6 +87,7 @@ const translations = {
     organic: "Organic",
     fairTrade: "Fair Trade",
     requirements: "Ahwehwεde Diani",
+    memberCertificationStatus: "Member Tεntεrεnni Tebea",
   },
   fr: {
     title: "Certification & Traçabilité",
@@ -96,35 +109,45 @@ const translations = {
     organic: "Biologique",
     fairTrade: "Commerce Équitable",
     requirements: "Exigences Satisfaites",
+    memberCertificationStatus: "Statut Certification Membres",
   },
-}
+};
 
-export function Certification({ language, userRole }: CertificationProps) {
-  const t = translations[language]
+// This is the component that will be imported into different dashboard pages
+export function CertificationSection({ language, userRole }: CertificationProps) {
+  const t = translations[language];
 
-  const farmStoryData = {
-    village: "Kabile",
-    gpsCoords: "7.9465° N, 2.1734° W",
-    harvestPeriod: "October - December 2023",
-    methods: ["Organic", "Fair Trade"],
-    batchId: "GC-KAB-2024-001",
-  }
-
-  const certificationData = {
+  // --- MOCK DATA ---
+  // In a real app, this data would be fetched based on the logged-in user
+  const farmerCertificationData = {
     status: "certified",
     score: 92,
     nextAudit: "2024-06-15",
     requirementsMet: 18,
     totalRequirements: 20,
-  }
+    farmStory: {
+      village: "Kabile",
+      gpsCoords: "7.9465° N, 2.1734° W",
+      harvestPeriod: "October - December 2023",
+      methods: ["Organic", "Fair Trade"],
+      batchId: "GC-KAB-2024-001",
+    }
+  };
 
-  return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-green-600">{t.title}</h2>
-      </div>
+  const coopLeaderData = {
+    members: [
+        { name: "Kwame Asante", status: "Certified", progress: 100 },
+        { name: "Ama Osei", status: "In Progress", progress: 85 },
+        { name: "Kofi Mensah", status: "Pending Audit", progress: 95 },
+    ]
+  };
 
-      {/* Certification Status */}
+  // --- ROLE-SPECIFIC RENDER LOGIC ---
+  
+  // View for a Farmer
+  const FarmerView = () => (
+    <>
+      {/* Certification Status Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -133,108 +156,86 @@ export function Certification({ language, userRole }: CertificationProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold">GoodCashew Certified</span>
-            <Badge className="bg-green-500">
-              <CheckCircle className="h-4 w-4 mr-1" />
-              {t.certified}
-            </Badge>
-          </div>
-
-          <div>
-            <div className="flex justify-between text-sm mb-2">
-              <span>{t.requirements}</span>
-              <span>
-                {certificationData.requirementsMet}/{certificationData.totalRequirements}
-              </span>
+            <Badge className="bg-green-500"><CheckCircle className="h-4 w-4 mr-1" />{t.certified}</Badge>
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span>{t.requirements}</span>
+                <span>{farmerCertificationData.requirementsMet}/{farmerCertificationData.totalRequirements}</span>
+              </div>
+              <Progress value={(farmerCertificationData.requirementsMet / farmerCertificationData.totalRequirements) * 100} className="h-3" />
             </div>
-            <Progress
-              value={(certificationData.requirementsMet / certificationData.totalRequirements) * 100}
-              className="h-3"
-            />
-          </div>
-
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-green-800">
-              <strong>{t.nextAudit}:</strong> {certificationData.nextAudit}
-            </p>
-          </div>
+            <p className="text-sm text-muted-foreground"><strong>{t.nextAudit}:</strong> {farmerCertificationData.nextAudit}</p>
         </CardContent>
       </Card>
 
-      {/* Farm Story Builder */}
+      {/* Farm Story Builder Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-blue-500" />
-            {t.farmStory}
-          </CardTitle>
+          <CardTitle>{t.farmStory}</CardTitle>
+          <CardDescription>{t.traceabilityProfile}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">{t.village}</p>
-                <p className="text-sm text-gray-600">{farmStoryData.village}</p>
-              </div>
-              <MapPin className="h-5 w-5 text-gray-400" />
+        <CardContent className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <p className="font-medium">{t.village}:</p><p>{farmerCertificationData.farmStory.village}</p>
             </div>
-
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">{t.gpsCoords}</p>
-                <p className="text-sm text-gray-600">{farmStoryData.gpsCoords}</p>
-              </div>
-              <MapPin className="h-5 w-5 text-gray-400" />
+             <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <p className="font-medium">{t.harvestTimeline}:</p><p>{farmerCertificationData.farmStory.harvestPeriod}</p>
             </div>
-
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">{t.harvestTimeline}</p>
-                <p className="text-sm text-gray-600">{farmStoryData.harvestPeriod}</p>
-              </div>
-              <Calendar className="h-5 w-5 text-gray-400" />
-            </div>
-
-            <div className="p-3 bg-gray-50 rounded-lg">
-              <p className="font-medium mb-2">{t.methods}</p>
-              <div className="flex gap-2">
-                {farmStoryData.methods.map((method, index) => (
-                  <Badge key={index} variant="secondary">
-                    {method}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">{t.batchLink}</p>
-                <p className="text-sm text-gray-600">{farmStoryData.batchId}</p>
-              </div>
-              <QrCode className="h-5 w-5 text-gray-400" />
-            </div>
-          </div>
         </CardContent>
       </Card>
 
-      {/* Actions */}
-      <div className="grid grid-cols-1 gap-4">
-        <Button className="h-16 flex flex-col gap-2">
-          <Download className="h-6 w-6" />
-          <span>{t.downloadBadge}</span>
-        </Button>
-
-        <Button variant="outline" className="h-16 flex flex-col gap-2">
-          <QrCode className="h-6 w-6" />
-          <span>{t.generateQR}</span>
-        </Button>
-
-        <Button variant="outline" className="h-16 flex flex-col gap-2">
-          <MapPin className="h-6 w-6" />
-          <span>{t.viewProfile}</span>
-        </Button>
+      {/* Actions Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <Button><Download className="h-4 w-4 mr-2" />{t.downloadBadge}</Button>
+        <Button variant="outline"><QrCode className="h-4 w-4 mr-2" />{t.generateQR}</Button>
       </div>
+    </>
+  );
+
+  // View for a Coop Leader or Admin
+  const LeaderView = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t.memberCertificationStatus}</CardTitle>
+        <CardDescription>Overview of certification progress for all members.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Progress</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {coopLeaderData.members.map(member => (
+              <TableRow key={member.name}>
+                <TableCell className="font-medium">{member.name}</TableCell>
+                <TableCell><Badge variant={member.status === "Certified" ? "default" : "secondary"}>{member.status}</Badge></TableCell>
+                <TableCell className="text-right">{member.progress}%</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+
+
+  // --- MAIN RENDER ---
+  // This is where we decide which view to show based on the user's role.
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h2 className="text-2xl font-bold">{t.title}</h2>
+      </div>
+      
+      {/* Conditional rendering based on the userRole prop */}
+      {userRole === 'farmer' && <FarmerView />}
+      {(userRole === 'coop-leader' || userRole === 'admin') && <LeaderView />}
+      {/* You could add a specific view for 'extension-worker' here as well */}
+
     </div>
-  )
+  );
 }
