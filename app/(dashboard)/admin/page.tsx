@@ -1,48 +1,45 @@
 // app/(dashboard)/admin/page.tsx
 "use client";
 
-import React from 'react';
-import { Users, UserCheck, Activity, LineChart } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { Spinner } from "@/components/ui/spinner"; // optional
 
-// CORRECTED: Importing UI components from the central library
+// Your existing imports…
+import { Users, UserCheck, Activity, LineChart } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
-// CORRECTED: Importing shared types from the central types file
-import type { UserRole, Language } from '@/lib/types'; 
-
-// Translations specific to this dashboard
-const translations: Record<Language, { title: string; description: string; [key: string]: string }> = {
-  en: {
-    title: "Admin Dashboard",
-    description: "Oversee program data and support onboarding",
-    totalUsers: "Total Users",
-    activeUsers: "Active This Week",
-    onboardingProgress: "Onboarding Progress",
-    systemHealth: "System Health",
-    viewAllUsers: "View All Users",
-  },
-  twi: { 
-    title: "Admin Dashboard (Twi)",
-    description: "Oversee program data and support onboarding (Twi)",
-  },
-  nafana: { 
-    title: "Admin Dashboard (Nafana)",
-    description: "Oversee program data and support onboarding (Nafana)",
-  },
-  fr: { 
-    title: "Tableau de Bord Administrateur",
-    description: "Superviser les données du programme et l'intégration",
-  },
+// Text translations
+const t = {
+  title: "Admin Dashboard",
+  description: "Oversee program data and support onboarding",
+  totalUsers: "Total Users",
+  activeUsers: "Active This Week",
+  onboardingProgress: "Onboarding Progress",
+  systemHealth: "System Health",
+  viewAllUsers: "View All Users",
 };
 
 export default function AdminDashboardPage() {
-  // In a real app, this data would be fetched from Supabase
-  const language: Language = "en";
-  const t = translations[language];
+  const isAdmin = useAdminCheck();
+  const router = useRouter();
 
-  // Placeholder data for the admin dashboard
+  if (isAdmin === null) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <Spinner /> {/* or just: "Loading..." */}
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    router.push("/unauthorized");
+    return null;
+  }
+
+  // Placeholder dashboard data
   const dashboardData = {
     totalUsers: 80,
     activeUsers: 65,
@@ -56,10 +53,9 @@ export default function AdminDashboardPage() {
         <p className="text-muted-foreground">{t.description}</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.totalUsers}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -69,7 +65,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.activeUsers}</CardTitle>
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -79,7 +75,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.onboardingProgress}</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -89,7 +85,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.systemHealth}</CardTitle>
             <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -99,8 +95,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
-      
-      {/* User Management Section */}
+
       <Card>
         <CardHeader>
           <CardTitle>User Management</CardTitle>
