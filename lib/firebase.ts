@@ -11,22 +11,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 };
 
+// This robust initialization prevents re-initializing the app on every hot reload
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
 // This activates App Check for your frontend app.
-// It runs only in the browser.
+// It runs only in the browser, which is why we check for `typeof window`.
 if (typeof window !== 'undefined') {
   initializeAppCheck(app, {
-    // This line has been updated with your key
-    provider: new ReCaptchaV3Provider('6LcuEF4rAAAAACMhCxN6xWbYWiczXAj8WhTL3iC3'),
+    // Reads the key from your environment variables for better security and management
+    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!),
     isTokenAutoRefreshEnabled: true
   });
 }
 
-// This logic for the emulator is correct and should be kept.
+// This logic allows you to connect to the local Firebase emulator for safe testing
 if (process.env.NEXT_PUBLIC_USE_EMULATOR === 'true') {
   connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
 }
 
+// Exports the configured auth service for use in other parts of your application
 export { auth };
