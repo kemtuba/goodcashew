@@ -19,7 +19,7 @@ const auth = getAuth(app);
 if (typeof window !== 'undefined') {
   initializeAppCheck(app, {
     // This line has been updated with your key
-    provider: new ReCaptchaV3Provider('6LfhOl0rAAAAANECWhUbiL0Oyts0faJcBLiXs3FF'),
+    provider: new ReCaptchaV3Provider('6LcuEF4rAAAAACMhCxN6xWbYWiczXAj8WhTL3iC3'),
     isTokenAutoRefreshEnabled: true
   });
 }

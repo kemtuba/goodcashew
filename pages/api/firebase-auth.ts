@@ -1,62 +1,65 @@
+// pages/api/firebase-auth.ts (AFTER)
+
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { adminAuth } from '@/lib/firebase-admin'; // Assuming you have an admin setup
 
-// Define the shape of the data you expect to send back on success
-type SuccessResponseData = {
-  userProfile: {
-    id: string;
-    full_name: string | null;
-    role: string | null;
-    is_active: boolean | null;
-  }
-};
+// It's good practice to define the type on the backend as well
+type UserRole = 'farmer' | 'coop-leader' | 'extension-worker' | 'admin' | 'retailer';
+const VALID_ROLES: UserRole[] = ['farmer', 'coop-leader', 'extension-worker']; // Only these roles can be assigned on signup
 
-// Define the shape of the data for an error response
-type ErrorResponseData = {
-  error: string;
-};
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<SuccessResponseData | ErrorResponseData>
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const { firebase_token } = req.body;
+    // UPDATED: Destructure both firebase_token and role from the request body
+    const { firebase_token, role } = req.body as { firebase_token: string; role: UserRole };
 
-    if (!firebase_token) {
-      return res.status(400).json({ error: 'Firebase token not provided.' });
+    // NEW: Add validation to ensure both token and a valid role are present
+    if (!firebase_token || !role) {
+      return res.status(400).json({ error: 'Missing firebase_token or role in request body.' });
     }
     
-    // Determine the Edge Function URL based on the environment
-    const edgeFunctionUrl = `${process.env.SUPABASE_URL}/functions/v1/firebase-auth`;
-
-    const edgeRes = await fetch(edgeFunctionUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
-      },
-      body: JSON.stringify({ firebase_token }),
-    });
-
-    const data = await edgeRes.json();
-
-    if (!edgeRes.ok) {
-      // Forward the error from the edge function
-      return res.status(edgeRes.status).json({ error: data.error || 'Edge function returned an error.' });
+    if (!VALID_ROLES.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role provided.' });
     }
 
-    // On success, return the data which should match our SuccessResponseData type
-    return res.status(200).json(data);
+    // 1. Verify the Firebase ID token using the Firebase Admin SDK
+    const decodedToken = await adminAuth.verifyIdToken(firebase_token);
+    const { uid, phone_number } = decodedToken;
 
-  } catch (err) {
-    console.error('Error in API route:', err);
-    // Use a safe way to get the error message
-    const errorMessage = err instanceof Error ? err.message : 'An internal server error occurred.';
-    return res.status(500).json({ error: errorMessage });
+    // 2. Find or create the user in your own database (e.g., PostgreSQL, MongoDB)
+    //    You would replace this with your actual database logic.
+    //
+    //    IMPORTANT: The `role` is now passed when creating a new user.
+    //    Your database logic should be designed to only set the role on the *first* login.
+    
+    // Example database interaction (replace with your own db client like Prisma, etc.)
+    // let userProfile = await db.user.findUnique({ where: { firebaseUID: uid } });
+    // if (!userProfile) {
+    //   userProfile = await db.user.create({
+    //     data: {
+    //       firebaseUID: uid,
+    //       phoneNumber: phone_number,
+    //       role: role, // <-- Using the role from the request!
+    //       // ... other default fields
+    //     }
+    //   });
+    // }
+    
+    // For now, we'll return a mock user profile for demonstration
+    const userProfile = {
+        firebaseUID: uid,
+        phoneNumber: phone_number,
+        role: role, 
+    };
+
+    // 3. Return the user profile to the client
+    return res.status(200).json({ message: "Authentication successful", userProfile });
+
+  } catch (error: any) {
+    console.error("Firebase auth API error:", error);
+    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 }
