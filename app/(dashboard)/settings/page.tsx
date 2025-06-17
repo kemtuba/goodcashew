@@ -1,4 +1,3 @@
-// app/(dashboard)/settings/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,96 +5,67 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { Globe, User, Bell, Info } from "lucide-react";
 
-// CORRECTED: Importing UI components from the central library
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 
-// CORRECTED: Importing shared types from the central types file
 import type { Language, UserRole } from "@/lib/types";
 
-// Translations specific to this page
-const translations = {
+// Type definition for a single translation set
+type TranslationSet = {
+  title: string;
+  language: string;
+  userRole: string;
+  notifications: string;
+  about: string;
+  version: string;
+  currentRole: string;
+  farmer: string;
+  extensionWorker: string;
+  coopLeader: string;
+  admin: string;
+  retailer: string;
+  english: string;
+  twi: string;
+  nafana: string;
+  french: string;
+};
+
+// Complete translations object to satisfy TypeScript types
+const translations: Record<Language, TranslationSet> = {
   en: {
-    title: "Settings",
-    language: "Language",
-    userRole: "Switch Role",
-    notifications: "Notifications",
-    about: "About GoodCashew",
-    version: "Version 1.0.0",
-    currentRole: "Current Role",
-    farmer: "Farmer",
-    extensionWorker: "Extension Worker",
-    coopLeader: "Cooperative Leader",
-    admin: "Administrator",
-    retailer: "Retailer",
-    english: "English",
-    twi: "Twi",
-    nafana: "Nafana",
-    french: "French",
+    title: "Settings", language: "Language", userRole: "Switch Role", notifications: "Notifications",
+    about: "About GoodCashew", version: "Version 1.0.0", currentRole: "Current Role",
+    farmer: "Farmer", extensionWorker: "Extension Worker", coopLeader: "Cooperative Leader",
+    admin: "Administrator", retailer: "Retailer", english: "English", twi: "Twi",
+    nafana: "Nafana", french: "French",
   },
-  // FIXED: Added placeholder data for other languages to satisfy TypeScript
   twi: {
-    title: "Nhyehyɛe",
-    language: "Kasa",
-    userRole: "Sesa Dwumadi",
-    notifications: "Amanneɛbɔ",
-    about: "GoodCashew Ho Nsɛm",
-    version: "Nkyerɛwde 1.0.0",
-    currentRole: "Dwumadi a Woyɛ",
-    farmer: "Okuafo",
-    extensionWorker: "Mmoa Adwumayɛfo",
-    coopLeader: "Kuo Kannifo",
-    admin: "Ɔhwɛfo",
-    retailer: "Retailer",
-    english: "Borɔfo Kasa",
-    twi: "Twi",
-    nafana: "Nafana",
-    french: "Frɛnkye Kasa",
+    title: "Nhyehyɛe", language: "Kasa", userRole: "Sesa Dwumadi", notifications: "Amanneɛbɔ",
+    about: "GoodCashew Ho Nsɛm", version: "Nkyerɛwde 1.0.0", currentRole: "Dwumadi a Woyɛ",
+    farmer: "Okuafo", extensionWorker: "Mmoa Adwumayɛfo", coopLeader: "Kuo Kannifo",
+    admin: "Ɔhwɛfo", retailer: "Retailer", english: "Borɔfo Kasa", twi: "Twi",
+    nafana: "Nafana", french: "Frɛnkye Kasa",
   },
   nafana: {
-    title: "Yεlεni",
-    language: "Kasa",
-    userRole: "Sesa Tuma",
-    notifications: "Amanneεbɔ",
-    about: "GoodCashew Ho Nsεm",
-    version: "Nkyerεwde 1.0.0",
-    currentRole: "Tuma a Woyε",
-    farmer: "Kuoro",
-    extensionWorker: "Dεmε Tumani",
-    coopLeader: "Kuo Yεlεni",
-    admin: "Yεlεni Kεsε",
-    retailer: "Retailer",
-    english: "Borɔfo Kasa",
-    twi: "Twi",
-    nafana: "Nafana",
-    french: "Frεnkye Kasa",
+    title: "Yεlεni", language: "Kasa", userRole: "Sesa Tuma", notifications: "Amanneεbɔ",
+    about: "GoodCashew Ho Nsεm", version: "Nkyerεwde 1.0.0", currentRole: "Tuma a Woyε",
+    farmer: "Kuoro", extensionWorker: "Dεmε Tumani", coopLeader: "Kuo Yεlεni",
+    admin: "Yεlεni Kεsε", retailer: "Retailer", english: "Borɔfo Kasa", twi: "Twi",
+    nafana: "Nafana", french: "Frεnkye Kasa",
   },
   fr: {
-    title: "Paramètres",
-    language: "Langue",
-    userRole: "Changer Rôle",
-    notifications: "Notifications",
-    about: "À Propos de GoodCashew",
-    version: "Version 1.0.0",
-    currentRole: "Rôle Actuel",
-    farmer: "Agriculteur",
-    extensionWorker: "Agent de Vulgarisation",
-    coopLeader: "Leader Coopératif",
-    admin: "Administrateur",
-    retailer: "Détaillant",
-    english: "Anglais",
-    twi: "Twi",
-    nafana: "Nafana",
-    french: "Français",
+    title: "Paramètres", language: "Langue", userRole: "Changer Rôle", notifications: "Notifications",
+    about: "À Propos de GoodCashew", version: "Version 1.0.0", currentRole: "Rôle Actuel",
+    farmer: "Agriculteur", extensionWorker: "Agent de Vulgarisation", coopLeader: "Leader Coopératif",
+    admin: "Administrateur", retailer: "Détaillant", english: "Anglais", twi: "Twi",
+    nafana: "Nafana", french: "Français",
   },
 };
 
 export default function SettingsPage() {
   const router = useRouter();
 
-  // State for user data and settings
   const [language, setLanguage] = useState<Language>("en");
   const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
   const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
@@ -103,23 +73,28 @@ export default function SettingsPage() {
 
   const t = translations[language];
 
-  // Fetch the user's profile and available roles on component mount
   useEffect(() => {
     const fetchUserProfile = async () => {
+      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        router.push('/login');
+        router.push('/'); 
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('goodcashew_users')
+      // NOTE: Replace 'profiles' with your actual Supabase table name for user profiles
+      const { data: profile, error } = await supabase
+        .from('profiles') 
         .select('roles')
         .eq('id', session.user.id)
         .single();
 
-      if (profile && profile.roles) {
-        // For simplicity, we assume the current role is the first one in their list.
+      if (error) {
+        console.error("Error fetching user profile:", error);
+      }
+      
+      if (profile && profile.roles && profile.roles.length > 0) {
+        // Sets the current role and the list of roles available to switch to
         setCurrentRole(profile.roles[0]); 
         setAvailableRoles(profile.roles);
       }
@@ -128,18 +103,20 @@ export default function SettingsPage() {
     fetchUserProfile();
   }, [router]);
 
-  // Handler for when a user selects a new role from the dropdown
-  const handleRoleChange = (newRole: UserRole) => {
+  const handleRoleChange = (newRoleValue: string) => {
+    const newRole = newRoleValue as UserRole;
     if (newRole && newRole !== currentRole) {
-      router.push(`/${newRole}`);
+      setCurrentRole(newRole);
+      // In a real app, you might make an API call to update the user's session
+      // then use router.refresh() to reload server components with the new role.
+      console.log(`Switched to role: ${newRole}`);
     }
   };
 
   if (loading) {
-    return <div>Loading settings...</div>;
+    return <div className="p-8 text-center">Loading settings...</div>;
   }
 
-  // A map to get the display label for a role key
   const roleLabels: Record<UserRole, string> = {
     farmer: t.farmer,
     "extension-worker": t.extensionWorker,
@@ -149,16 +126,18 @@ export default function SettingsPage() {
   };
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-8">
       <div>
         <h1 className="text-3xl font-bold">{t.title}</h1>
         <p className="text-muted-foreground">Manage your account and app settings.</p>
       </div>
 
-      {/* Language Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>{t.language}</CardTitle>
+          <div className="flex items-center gap-3">
+            <Globe className="h-5 w-5 text-muted-foreground" />
+            <CardTitle>{t.language}</CardTitle>
+          </div>
           <CardDescription>Choose your preferred language for the application.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -176,12 +155,17 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* User Role Switching (only shows if user has more than one role) */}
       {availableRoles.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>{t.userRole}</CardTitle>
-            <CardDescription>Switch between your available roles.</CardDescription>
+            <div className="flex items-center gap-3">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>{t.userRole}</CardTitle>
+            </div>
+            <CardDescription>
+              Your current role is **{currentRole ? roleLabels[currentRole] : '...'}**. 
+              Switch between your available roles.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Select onValueChange={handleRoleChange} defaultValue={currentRole || undefined}>
@@ -200,28 +184,32 @@ export default function SettingsPage() {
         </Card>
       )}
 
-      {/* Notifications Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>{t.notifications}</CardTitle>
+            <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>{t.notifications}</CardTitle>
+            </div>
           <CardDescription>Manage your notification preferences.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-2 rounded-lg border">
-            <label htmlFor="school-events" className="font-medium">School Events</label>
-            <Switch id="school-events" defaultChecked />
+          <div className="flex items-center justify-between p-3 rounded-lg border">
+            <label htmlFor="coop-updates" className="font-medium text-sm">Cooperative Updates</label>
+            <Switch id="coop-updates" defaultChecked />
           </div>
-          <div className="flex items-center justify-between p-2 rounded-lg border">
-            <label htmlFor="pest-alerts" className="font-medium">Pest Alerts</label>
-            <Switch id="pest-alerts" defaultChecked />
+          <div className="flex items-center justify-between p-3 rounded-lg border">
+            <label htmlFor="market-alerts" className="font-medium text-sm">Market Price Alerts</label>
+            <Switch id="market-alerts" />
           </div>
         </CardContent>
       </Card>
 
-      {/* About Section */}
       <Card>
         <CardHeader>
-          <CardTitle>{t.about}</CardTitle>
+            <div className="flex items-center gap-3">
+                <Info className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>{t.about}</CardTitle>
+            </div>
         </CardHeader>
         <CardContent>
           <div className="text-center space-y-2 text-muted-foreground">

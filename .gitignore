@@ -25,5 +25,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Local .env file
-.env*.local.DS_Store
+# Local .env files - DO NOT COMMIT THESE
+.env*.local
+
+# Ignore Google Cloud service account keys
+service-account.json
+

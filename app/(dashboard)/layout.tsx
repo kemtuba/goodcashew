@@ -10,7 +10,7 @@ import { Header } from '@/components/sections/dashboard/Header';
 import { Sidebar } from '@/components/ui/sidebar';
 
 // Import shared types from your central types file
-import type { UserRole, Language } from '@/lib/types';
+import type { UserRole } from '@/lib/types';
 
 /**
  * This DashboardLayout is a "client" component that acts as a secure wrapper.

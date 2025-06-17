@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Users, MapPin, CheckCircle } from "lucide-react";
+import { Users, MapPin } from "lucide-react";
 
 // CORRECTED: Importing UI components from the central library
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
