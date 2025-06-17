@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Check, AlertCircle, Loader2, Users, Briefcase, Crown } from "lucide-react"
+import { ArrowRight, Check, AlertCircle, Loader2, Users, Briefcase, Crown, Settings, ShoppingCart } from "lucide-react"
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
-import { auth } from '@/lib/firebase';
+import { auth, appCheck } from '@/lib/firebase';
+import { getToken } from "firebase/app-check";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { UserRole } from "@/lib/types"
@@ -19,44 +20,21 @@ declare global {
 
 // --- ALL UI COMPONENTS ARE NOW DEFINED IN THIS FILE ---
 
-// UPDATED: The SVG now includes a third path for the brown cashew nut.
 const CashewIcon = () => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 100 105" // viewBox is slightly taller to include the nut
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    {/* Path for the green leaf */}
-    <path
-      d="M60 20 C50 10, 30 15, 20 30"
-      stroke="#4ADE80" strokeWidth="8" strokeLinecap="round"
-    />
-    {/* Path for the yellow fruit body */}
-    <path
-      d="M50 30 C10 40, 10 90, 55 90 S90 60, 70 40 C65 30, 55 25, 50 30 Z"
-      fill="#FBBF24"
-    />
-    {/* Path for the brown cashew nut */}
-    <path
-      d="M55 90 C 50 100, 60 105, 65 95"
-      stroke="#A16207" strokeWidth="8" strokeLinecap="round"
-    />
+  <svg width="22" height="22" viewBox="0 0 100 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M60 20 C50 10, 30 15, 20 30" stroke="#4ADE80" strokeWidth="8" strokeLinecap="round"/>
+    <path d="M50 30 C10 40, 10 90, 55 90 S90 60, 70 40 C65 30, 55 25, 50 30 Z" fill="#FBBF24"/>
+    <path d="M55 90 C 50 100, 60 105, 65 95" stroke="#A16207" strokeWidth="8" strokeLinecap="round"/>
   </svg>
 );
 
-
-// UPDATED: The logotype now uses absolute positioning for a true superscript effect.
 const GoodCashewLogo = () => {
   return (
-    // The parent container is now 'relative'
     <div className="relative">
       <svg width="180" height="28" viewBox="0 0 180 28" fill="none" xmlns="http://www.w3.org/2000/svg">
         <text x="0" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="300" fill="white" letterSpacing="0.05em">GOOD</text>
         <text x="73" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="700" fill="white" letterSpacing="0.05em">CASHEW</text>
       </svg>
-      {/* This div is now 'absolute' and positioned at the top-right */}
       <div className="absolute -top-2 -right-3">
         <CashewIcon />
       </div>
@@ -64,13 +42,13 @@ const GoodCashewLogo = () => {
   );
 };
 
-
-// The illustration component - no changes needed here.
 const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
-  const roleVisuals = {
+  const roleVisuals: Record<UserRole, { Icon: React.ElementType, gradient: string, color: string }> = {
     farmer: { Icon: Users, gradient: "from-green-500/10 to-green-500/0", color: "text-green-400" },
     'coop-leader': { Icon: Crown, gradient: "from-amber-500/10 to-amber-500/0", color: "text-amber-400" },
     'extension-worker': { Icon: Briefcase, gradient: "from-slate-500/10 to-slate-500/0", color: "text-slate-400" },
+    admin: { Icon: Settings, gradient: "from-gray-500/10 to-gray-500/0", color: "text-gray-400" },
+    retailer: { Icon: ShoppingCart, gradient: "from-orange-500/10 to-orange-500/0", color: "text-orange-400" },
   };
   const visual = roleVisuals[role || 'farmer'];
 
@@ -83,6 +61,7 @@ const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
   );
 };
 
+// CORRECTED: This component now correctly returns JSX.
 const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
   roles: { key: UserRole; label: string }[],
   selectedRole: UserRole,
@@ -156,6 +135,11 @@ export default function HomePage() {
     }
     setError(''); setLoading(true);
     try {
+      if (!appCheck) {
+        throw new Error("App Check is not initialized.");
+      }
+      const appCheckTokenResponse = await getToken(appCheck, false);
+
       const confirmationResult = window.confirmationResult!;
       const userCredential = await confirmationResult.confirm(code);
       const firebaseUser = userCredential.user;
@@ -164,7 +148,10 @@ export default function HomePage() {
       const firebaseToken = await firebaseUser.getIdToken(true);
       const response = await fetch('/api/firebase-auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Firebase-AppCheck': appCheckTokenResponse.token,
+        },
         body: JSON.stringify({ firebase_token: firebaseToken, role: selectedRole }),
       });
 
@@ -220,8 +207,13 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <Button onClick={handleSendCode} disabled={loading || !selectedRole || !phoneValid} className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 text-white font-bold text-lg py-3 h-14">
-                  {loading ? "Sending..." : `Continue as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).replace('-', ' ')}`}
+                <Button onClick={handleSendCode} disabled={loading || !selectedRole || !phoneValid} className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 text-white font-bold text-lg py-3 h-14 group flex items-center justify-center">
+                  {loading ? (<Loader2 className="h-6 w-6 animate-spin" />) : (
+                    <>
+                      {`Continue as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).replace('-', ' ')}`}
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </Button>
               </div>
             ) : (
@@ -233,8 +225,8 @@ export default function HomePage() {
                   placeholder="6-digit code" required
                   className="w-full bg-gray-900/50 border border-gray-600/80 rounded-lg h-14 px-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
-                <Button onClick={handleVerifyCode} disabled={loading || code.length < 6} className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 text-white font-bold text-lg py-3 h-14">
-                  {loading ? "Verifying..." : "Verify & Login"}
+                <Button onClick={handleVerifyCode} disabled={loading || code.length < 6} className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 text-white font-bold text-lg py-3 h-14 flex items-center justify-center">
+                  {loading ? (<Loader2 className="h-6 w-6 animate-spin" />) : "Verify & Login"}
                 </Button>
               </div>
             )}

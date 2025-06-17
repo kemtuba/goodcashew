@@ -1,5 +1,3 @@
-// lib/firebase-admin.ts
-
 import admin from 'firebase-admin';
 
 // This prevents us from initializing the app multiple times in development
@@ -9,7 +7,6 @@ if (!admin.apps.length) {
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // This line correctly formats the private key from the environment variable
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
     });
@@ -18,7 +15,11 @@ if (!admin.apps.length) {
   }
 }
 
-// Export the initialized admin auth service for use in your API routes
+// Get the authentication service
 const adminAuth = admin.auth();
 
-export { adminAuth };
+// NEW: Get the App Check service
+const adminAppCheck = admin.appCheck();
+
+// UPDATED: Export both services
+export { adminAuth, adminAppCheck };
