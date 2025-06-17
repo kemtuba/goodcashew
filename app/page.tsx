@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+// UPDATED: Imported useSearchParams to read the URL
+import { useRouter, useSearchParams } from "next/navigation" 
 import { ArrowRight, Check, AlertCircle, Loader2, Users, Briefcase, Crown, Settings, ShoppingCart } from "lucide-react"
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import { auth, appCheck } from '@/lib/firebase';
@@ -61,7 +62,6 @@ const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
   );
 };
 
-// CORRECTED: This component now correctly returns JSX.
 const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
   roles: { key: UserRole; label: string }[],
   selectedRole: UserRole,
@@ -82,9 +82,11 @@ const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
 };
 
 
-// --- THE MAIN PAGE COMPONENT ---
+// --- THE MAIN PAGE COMPONENT (Corrected) ---
+
 export default function HomePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   
   const [selectedRole, setSelectedRole] = useState<UserRole>("farmer");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -95,12 +97,30 @@ export default function HomePage() {
   const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isPristine, setIsPristine] = useState(true);
 
+  // useEffect hook to check the URL on load for the role
+  useEffect(() => {
+    // CORRECTED: Added a safety check for null searchParams
+    if (!searchParams) {
+      return; // Do nothing if searchParams is not ready yet
+    }
+
+    const roleFromUrl = searchParams.get('role');
+    const allPossibleRoles: UserRole[] = ['farmer', 'coop-leader', 'extension-worker', 'admin', 'retailer'];
+    
+    if (roleFromUrl && allPossibleRoles.includes(roleFromUrl as UserRole)) {
+      setSelectedRole(roleFromUrl as UserRole);
+    }
+  }, [searchParams]);
+
+
+  // useEffect hook to initialize reCAPTCHA
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
     }
   }, []);
 
+  // useEffect hook to validate the phone number
   useEffect(() => {
     if (phoneNumber) {
         setPhoneValid(phoneNumber.length >= 10);
@@ -109,6 +129,7 @@ export default function HomePage() {
     }
   }, [phoneNumber]);
 
+  // Handler function to send the code
   const handleSendCode = async () => {
     if (!selectedRole || !phoneValid) {
       setError("Please select a role and enter a valid phone number.");
@@ -128,6 +149,7 @@ export default function HomePage() {
     }
   };
   
+  // Handler function to verify the code
   const handleVerifyCode = async () => {
     if (code.length < 6) {
       setError("Please enter the 6-digit code.");
@@ -183,7 +205,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-8">
+        <div className="w-full md:w/2 flex flex-col justify-center p-6 md:p-8">
             <div id="recaptcha-container"></div>
             {!isCodeSent ? (
               <div className="space-y-4">
@@ -235,4 +257,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-}
+}     
