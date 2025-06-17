@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-// UPDATED: Imported useSearchParams to read the URL
 import { useRouter, useSearchParams } from "next/navigation" 
 import { ArrowRight, Check, AlertCircle, Loader2, Users, Briefcase, Crown, Settings, ShoppingCart } from "lucide-react"
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
@@ -10,6 +9,9 @@ import { getToken } from "firebase/app-check";
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { UserRole } from "@/lib/types"
+
+// This line forces the page to be rendered dynamically, fixing prerender errors on Vercel.
+export const dynamic = 'force-dynamic';
 
 // This interface is required for attaching Firebase objects to the window
 declare global {
@@ -22,7 +24,13 @@ declare global {
 // --- ALL UI COMPONENTS ARE NOW DEFINED IN THIS FILE ---
 
 const CashewIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 100 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    width="22"
+    height="22"
+    viewBox="0 0 100 105"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path d="M60 20 C50 10, 30 15, 20 30" stroke="#4ADE80" strokeWidth="8" strokeLinecap="round"/>
     <path d="M50 30 C10 40, 10 90, 55 90 S90 60, 70 40 C65 30, 55 25, 50 30 Z" fill="#FBBF24"/>
     <path d="M55 90 C 50 100, 60 105, 65 95" stroke="#A16207" strokeWidth="8" strokeLinecap="round"/>
@@ -82,8 +90,7 @@ const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
 };
 
 
-// --- THE MAIN PAGE COMPONENT (Corrected) ---
-
+// --- THE MAIN PAGE COMPONENT ---
 export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -97,30 +104,21 @@ export default function HomePage() {
   const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isPristine, setIsPristine] = useState(true);
 
-  // useEffect hook to check the URL on load for the role
   useEffect(() => {
-    // CORRECTED: Added a safety check for null searchParams
-    if (!searchParams) {
-      return; // Do nothing if searchParams is not ready yet
-    }
-
+    if (!searchParams) { return; }
     const roleFromUrl = searchParams.get('role');
     const allPossibleRoles: UserRole[] = ['farmer', 'coop-leader', 'extension-worker', 'admin', 'retailer'];
-    
     if (roleFromUrl && allPossibleRoles.includes(roleFromUrl as UserRole)) {
       setSelectedRole(roleFromUrl as UserRole);
     }
   }, [searchParams]);
 
-
-  // useEffect hook to initialize reCAPTCHA
   useEffect(() => {
     if (typeof window !== 'undefined' && !window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
     }
   }, []);
 
-  // useEffect hook to validate the phone number
   useEffect(() => {
     if (phoneNumber) {
         setPhoneValid(phoneNumber.length >= 10);
@@ -129,7 +127,6 @@ export default function HomePage() {
     }
   }, [phoneNumber]);
 
-  // Handler function to send the code
   const handleSendCode = async () => {
     if (!selectedRole || !phoneValid) {
       setError("Please select a role and enter a valid phone number.");
@@ -149,7 +146,6 @@ export default function HomePage() {
     }
   };
   
-  // Handler function to verify the code
   const handleVerifyCode = async () => {
     if (code.length < 6) {
       setError("Please enter the 6-digit code.");
@@ -205,7 +201,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="w-full md:w/2 flex flex-col justify-center p-6 md:p-8">
+        <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-8">
             <div id="recaptcha-container"></div>
             {!isCodeSent ? (
               <div className="space-y-4">
@@ -257,4 +253,4 @@ export default function HomePage() {
       </div>
     </div>
   );
-}     
+}
