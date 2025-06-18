@@ -1,7 +1,8 @@
+// lib/firebase.ts
+
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-// NEW: Import the AppCheck type for better TypeScript support
-import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from "firebase/app-check";
+import { getAuth } from 'firebase/auth';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, AppCheck } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -10,23 +11,28 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Prevent reinitialization on Fast Refresh or SSR
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// Initialize Firebase Auth
 const auth = getAuth(app);
 
-// NEW: Declare the appCheck variable so we can export it
+// Declare appCheck so it can be exported
 let appCheck: AppCheck | undefined;
-if (typeof window !== 'undefined') {
+
+// Initialize App Check only in the browser
+if (typeof window !== 'undefined' && !(window as any). FIREBASE_APPCHECK_INITIALIZED) {
   appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!),
-    isTokenAutoRefreshEnabled: true
+    provider: new ReCaptchaEnterpriseProvider(
+      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!
+    ),
+    isTokenAutoRefreshEnabled: true,
   });
+  (window as any).FIREBASE_APPCHECK_INITIALIZED = true;
+  console.log('✅ Firebase App Check initialized');
 }
 
-if (process.env.NEXT_PUBLIC_USE_EMULATOR === 'true') {
-  connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-}
-
-// UPDATED: Export both auth and appCheck
 export { auth, appCheck };
