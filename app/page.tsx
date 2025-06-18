@@ -203,6 +203,18 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-b from-zinc-900 to-stone-900">
+      
+    {/* --- START: TEMPORARY DEBUGGING CODE --- */}
+      <div className="absolute top-2 left-2 bg-red-600 text-white p-2 text-xs z-50 font-mono rounded-lg shadow-lg">
+        <p className="font-bold border-b border-white/50 pb-1 mb-1">Vercel Environment Debug</p>
+        <p>
+          <span className="font-semibold">NEXT_PUBLIC_RECAPTCHA_SITE_KEY:</span>
+          <br />
+          {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "--- NOT SET ---"}
+        </p>
+      </div>
+      {/* --- END: TEMPORARY DEBUGGING CODE --- */}  
+      
       <div className="w-full max-w-sm md:max-w-4xl flex flex-col md:flex-row md:items-center rounded-xl overflow-hidden bg-stone-800/30 shadow-2xl">
         <div className="w-full md:w-1/2">
           <div className="w-full h-48 md:h-full md:aspect-auto aspect-video">
