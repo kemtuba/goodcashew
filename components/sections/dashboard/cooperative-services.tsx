@@ -2,10 +2,10 @@
 "use client";
 
 import React from 'react';
-import { DollarSign, Truck, BookOpen, Wrench, Gift, TrendingUp } from "lucide-react";
+import { DollarSign, Truck, BookOpen, Wrench, Gift } from "lucide-react";
 
 // CORRECTED: Importing UI components from the central library
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";

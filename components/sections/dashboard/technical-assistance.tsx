@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { MessageCircle, AlertCircle, Calendar, Users } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 // CORRECTED: Importing UI components from the central library
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

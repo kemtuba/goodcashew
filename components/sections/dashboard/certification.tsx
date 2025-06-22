@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { Award, QrCode, MapPin, Calendar, Download, CheckCircle, Users } from "lucide-react";
+import { Award, QrCode, Download, CheckCircle } from "lucide-react";
 
 // CORRECTED: Importing UI components from the central library
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

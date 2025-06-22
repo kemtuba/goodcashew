@@ -2,11 +2,10 @@
 "use client";
 
 import React from 'react';
-import { CheckCircle, Clock, Users, BookOpen } from "lucide-react";
+import { CheckCircle, Clock } from "lucide-react";
 
 // CORRECTED: Importing UI components from the central library
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
