@@ -1,14 +1,20 @@
-// hooks/use-toast.ts
+// /hooks/use-toast.ts
 
+"use client"
+
+import * as React from "react"
 import { create } from "zustand"
 import type { ToastActionElement } from "@/components/ui/toast"
 
 type ToastProps = {
-  id: string
+  id?: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
 }
+
+const TOAST_LIMIT = 1
+// REMOVED: The unused TOAST_REMOVE_DELAY constant has been deleted.
 
 type ToasterToast = ToastProps & {
   id: string
@@ -16,22 +22,39 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
 }
 
-const actionTypes = ["success", "info", "warning", "error"] as const
-
-type ToastActionType = (typeof actionTypes)[number]
+// REMOVED: The unused ToastActionType has been deleted.
 
 type ToastState = {
   toasts: ToasterToast[]
-  addToast: (toast: ToastProps) => void
-  dismiss: (id: string) => void
+  toast: (props: ToastProps) => {
+    id: string
+    dismiss: () => void
+  }
+  dismiss: (toastId?: string) => void
 }
 
-export const useToast = create<ToastState>((set) => ({
+export const useToast = create<ToastState>((set, get) => ({
   toasts: [],
-  addToast: (toast) =>
-    set((state) => ({ toasts: [...state.toasts, { ...toast }] })),
-  dismiss: (id) =>
+  toast: (props) => {
+    const id = crypto.randomUUID()
+    const newToast = { id, ...props }
+
     set((state) => ({
-      toasts: state.toasts.filter((t) => t.id !== id),
-    })),
+      toasts: [newToast, ...state.toasts.slice(0, TOAST_LIMIT - 1)],
+    }))
+
+    return {
+      id: id,
+      dismiss: () => get().dismiss(id),
+    }
+  },
+  dismiss: (toastId) => {
+    if (toastId) {
+      set((state) => ({
+        toasts: state.toasts.filter((t) => t.id !== toastId),
+      }))
+    } else {
+      set({ toasts: [] })
+    }
+  },
 }))
