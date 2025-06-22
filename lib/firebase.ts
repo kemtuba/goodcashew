@@ -2,7 +2,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeAppCheck, ReCaptchaEnterpriseProvider, AppCheck } from 'firebase/app-check';
+import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -26,7 +26,7 @@ let appCheck: AppCheck | undefined;
 // Initialize App Check only in the browser
 if (typeof window !== 'undefined' && !(window as any). FIREBASE_APPCHECK_INITIALIZED) {
   appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaEnterpriseProvider(
+    provider: new ReCaptchaV3Provider(
       process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!
     ),
     isTokenAutoRefreshEnabled: true,
