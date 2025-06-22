@@ -1,11 +1,10 @@
-// app/(dashboard)/admin/page.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useAdminCheck } from "@/hooks/useAdminCheck";
-import { Spinner } from "@/components/ui/spinner"; // optional
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAdminCheck } from "@/hooks/useAdminCheck"; 
+import { Spinner } from "@/components/ui/spinner"; 
 
-// Your existing imports…
 import { Users, UserCheck, Activity, LineChart } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,23 +22,28 @@ const t = {
 };
 
 export default function AdminDashboardPage() {
+  // This custom hook will protect the page
   const isAdmin = useAdminCheck();
   const router = useRouter();
 
+  // Shows a loading spinner while checking the user's role
   if (isAdmin === null) {
     return (
-      <div className="flex items-center justify-center h-40">
-        <Spinner /> {/* or just: "Loading..." */}
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />
       </div>
     );
   }
 
+  // If the hook determines the user is not an admin, it redirects them.
   if (!isAdmin) {
-    router.push("/unauthorized");
+    // It's better to handle the redirect inside the hook, 
+    // but this is a clear fallback.
+    router.push("/unauthorized"); 
     return null;
   }
 
-  // Placeholder dashboard data
+  // This is placeholder data that you will replace with real data.
   const dashboardData = {
     totalUsers: 80,
     activeUsers: 65,
@@ -47,7 +51,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold">{t.title}</h1>
         <p className="text-muted-foreground">{t.description}</p>
@@ -102,7 +106,7 @@ export default function AdminDashboardPage() {
           <CardDescription>View, add, or manage users in the system.</CardDescription>
         </CardHeader>
         <CardContent>
-          <p>This section would contain a table of users and management actions.</p>
+          <p className="text-sm text-muted-foreground">This section would contain a table of users and management actions.</p>
           <Button className="mt-4">{t.viewAllUsers}</Button>
         </CardContent>
       </Card>
