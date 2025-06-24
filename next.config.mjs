@@ -5,20 +5,17 @@ const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://apis.google.com;
   style-src 'self' 'unsafe-inline';
-  img-src * 'self' data:;
+  img-src 'self' data: https://www.google.com https://www.gstatic.com;
   font-src 'self' data:;
   frame-src 'self' https://www.google.com/recaptcha/ https://recaptcha.google.com/ https://*.firebaseapp.com;
-  connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com;
+  connect-src 'self' https://www.google.com https://*.googleapis.com https://*.firebaseapp.com;
 `;
 
 const nextConfig = {
-  // We recommend re-enabling these safety checks once development is stable
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // By removing the eslint and typescript blocks, you re-enable important safety checks
+  // that prevent you from accidentally deploying code with bugs or type errors.
+
+  // By removing the images block, you re-enable Vercel's powerful image optimization.
 
   async headers() {
     return [

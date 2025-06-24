@@ -11,7 +11,7 @@ import {
   Briefcase,
   Crown,
   Settings,
-  ShoppingCart
+  ShoppingCart,
 } from "lucide-react"
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth"
 import { auth, appCheck } from "@/lib/firebase"
@@ -20,10 +20,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { UserRole } from "@/lib/types"
 
-// This line forces the page to be rendered dynamically, fixing prerender errors on Vercel.
-export const dynamic = 'force-dynamic';
+// This line forces the page to be rendered dynamically, fixing prerender errors.
+export const dynamic = 'force-dynamic'
 
-// This interface is required for attaching Firebase objects to the window
+// This interface is required for attaching Firebase objects to the window.
 declare global {
   interface Window {
     recaptchaVerifier?: RecaptchaVerifier
@@ -31,7 +31,7 @@ declare global {
   }
 }
 
-// ====== UI COMPONENTS ======
+// ====== UI SUB-COMPONENTS ======
 
 const CashewIcon = () => (
   <svg width="22" height="22" viewBox="0 0 100 105" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,19 +41,20 @@ const CashewIcon = () => (
   </svg>
 );
 
-const GoodCashewLogo = () => (
-  <div className="relative">
-    <svg width="180" height="28" viewBox="0 0 180 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text x="0" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="300" fill="white" letterSpacing="0.05em">GOOD</text>
-      <text x="73" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="700" fill="white" letterSpacing="0.05em">CASHEW</text>
-    </svg>
-    <div className="absolute -top-2 -right-3">
-      <CashewIcon />
+const GoodCashewLogo = () => {
+  return (
+    <div className="relative">
+      <svg width="180" height="28" viewBox="0 0 180 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="300" fill="white" letterSpacing="0.05em">GOOD</text>
+        <text x="73" y="22" fontFamily="system-ui, sans-serif" fontSize="22" fontWeight="700" fill="white" letterSpacing="0.05em">CASHEW</text>
+      </svg>
+      <div className="absolute -top-2 -right-3">
+        <CashewIcon />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-// CORRECTED: This component now has a full implementation and accepts its props correctly.
 const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
   const roleVisuals: Record<UserRole, { Icon: React.ElementType; gradient: string; color: string }> = {
     farmer: { Icon: Users, gradient: "from-green-500/10 to-green-500/0", color: "text-green-400" },
@@ -63,7 +64,6 @@ const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
     retailer: { Icon: ShoppingCart, gradient: "from-orange-500/10 to-orange-500/0", color: "text-orange-400" },
   };
   const visual = roleVisuals[role || 'farmer'];
-
   return (
     <div className={`relative w-full h-full flex flex-col items-center justify-center rounded-lg overflow-hidden bg-zinc-800/30 p-4 gap-y-3`}>
       <div className={`absolute inset-0 bg-gradient-to-b ${visual.gradient}`} />
@@ -73,7 +73,6 @@ const RoleIllustration = ({ role }: { role: UserRole | "" }) => {
   );
 };
 
-// CORRECTED: This component now has a full implementation and accepts its props correctly.
 const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
   roles: { key: UserRole; label: string }[];
   selectedRole: UserRole;
@@ -86,9 +85,7 @@ const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
           key={role.key}
           onClick={() => setSelectedRole(role.key)}
           className={`w-full rounded-md p-2 text-sm font-semibold transition-colors duration-200 ${
-            selectedRole === role.key
-              ? "bg-amber-600 text-white"
-              : "text-gray-400 hover:text-white"
+            selectedRole === role.key ? "bg-amber-600 text-white" : "text-gray-400 hover:text-white"
           }`}>
           {role.label}
         </button>
@@ -97,8 +94,8 @@ const SegmentedControl = ({ roles, selectedRole, setSelectedRole }: {
   );
 };
 
-
 // ====== MAIN PAGE COMPONENT ======
+
 export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,10 +109,9 @@ export default function HomePage() {
   const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isPristine, setIsPristine] = useState(true);
 
-  // All hooks and handlers are correctly defined and used.
   useEffect(() => {
     if (!searchParams) return;
-    const roleFromUrl = searchParams.get("role") || "";
+    const roleFromUrl = searchParams.get("role");
     const allPossibleRoles: UserRole[] = ['farmer', 'coop-leader', 'extension-worker', 'admin', 'retailer'];
     if (roleFromUrl && allPossibleRoles.includes(roleFromUrl as UserRole)) {
       setSelectedRole(roleFromUrl as UserRole);
@@ -133,8 +129,67 @@ export default function HomePage() {
     setPhoneValid(phoneNumber ? phoneNumber.length >= 10 : null);
   }, [phoneNumber]);
 
-  const handleSendCode = async () => { /* ... full function logic ... */ };
-  const handleVerifyCode = async () => { /* ... full function logic ... */ };
+  const handleSendCode = async () => {
+    if (!selectedRole || !phoneValid) {
+      setError("Please select a role and enter a valid phone number.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const verifier = window.recaptchaVerifier!;
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+      window.confirmationResult = confirmationResult;
+      setIsCodeSent(true);
+    } catch (err: any) {
+      console.error("Error sending code:", err);
+      setError(err.message || "Failed to send verification code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (code.length < 6) {
+      setError("Please enter the 6‑digit code.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      if (!appCheck) throw new Error("AppCheck instance not found.");
+      const appCheckTokenResponse = await getToken(appCheck, false);
+
+      const confirmationResult = window.confirmationResult!;
+      const userCredential = await confirmationResult.confirm(code);
+      const firebaseUser = userCredential.user;
+      if (!firebaseUser) throw new Error("Firebase user not found.");
+
+      const firebaseToken = await firebaseUser.getIdToken(true);
+      const response = await fetch("/api/firebase-auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Firebase-AppCheck": appCheckTokenResponse.token,
+        },
+        body: JSON.stringify({ firebase_token: firebaseToken, role: selectedRole }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to sync user profile.");
+
+      const userRole = data.userProfile?.role;
+      if (userRole) {
+        router.push(`/dashboard/${userRole}`);
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Error verifying code:", err);
+      setError(err.message || "Failed to verify code.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const roles = [
     { key: "farmer" as UserRole, label: "Farmer" },
@@ -150,6 +205,7 @@ export default function HomePage() {
             <RoleIllustration role={selectedRole} />
           </div>
         </div>
+
         <div className="w-full md:w-1/2 flex flex-col justify-center p-6 md:p-8">
           <div id="recaptcha-container"></div>
           {!isCodeSent ? (
@@ -171,10 +227,17 @@ export default function HomePage() {
                       setPhoneNumber(e.target.value);
                       setIsPristine(false);
                     }}
-                    className={`w-full bg-transparent border-0 rounded-none h-14 px-4 text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 pr-10 transition-all ${isPristine ? "animate-pulse ring-2 ring-amber-500/50" : ""}`}
+                    className={`w-full bg-transparent border-0 rounded-none h-14 px-4 text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0 pr-10 transition-all ${
+                      isPristine ? "animate-pulse ring-2 ring-amber-500/50" : ""
+                    }`}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {phoneNumber.length > 0 && (phoneValid ? <Check className="h-5 w-5 text-green-500" /> : <AlertCircle className="h-5 w-5 text-red-500" />)}
+                    {phoneNumber.length > 0 &&
+                      (phoneValid ? (
+                        <Check className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      ))}
                   </div>
                 </div>
               </div>
@@ -187,7 +250,9 @@ export default function HomePage() {
                   <Loader2 className="h-6 w-6 animate-spin" />
                 ) : (
                   <>
-                    {`Continue as ${selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).replace("-", " ")}`}
+                    {`Continue as ${
+                      selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1).replace("-", " ")
+                    }`}
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -197,9 +262,12 @@ export default function HomePage() {
             <div className="space-y-4">
               <p className="text-center text-sm text-gray-300">Enter the code we sent you.</p>
               <Input
-                id="code" type="text" value={code}
+                id="code"
+                type="text"
+                value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="6-digit code" required
+                placeholder="6-digit code"
+                required
                 className="w-full bg-gray-900/50 border border-gray-600/80 rounded-lg h-14 px-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
               />
               <Button
@@ -207,7 +275,7 @@ export default function HomePage() {
                 disabled={loading || code.length < 6}
                 className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-gray-600 text-white font-bold text-lg py-3 h-14 flex items-center justify-center"
               >
-                {loading ? (<Loader2 className="h-6 w-6 animate-spin" />) : "Verify & Login"}
+                {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : "Verify & Login"}
               </Button>
             </div>
           )}
@@ -217,4 +285,3 @@ export default function HomePage() {
     </div>
   );
 }
-
