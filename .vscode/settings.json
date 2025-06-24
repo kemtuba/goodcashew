@@ -1,13 +1,10 @@
+// .vscode/settings.json
 {
   "deno.enable": true,
   "deno.lint": true,
-  "deno.unstable": true,
-  // This tells VS Code to ONLY use the Deno runtime for files inside your 'supabase' folder
   "deno.enablePaths": [
     "supabase"
   ],
-  // This sets Deno as the default formatter for all TypeScript files,
-  // which provides consistent styling.
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   }
