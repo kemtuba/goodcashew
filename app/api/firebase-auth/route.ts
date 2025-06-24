@@ -4,12 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminAppCheck } from '@/lib/firebase-admin';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// Defines the valid user roles for signup
 type UserRole = 'farmer' | 'coop-leader' | 'extension-worker' | 'admin' | 'retailer';
 
 export async function POST(request: NextRequest) {
   
-  // App Check Verification - We know this works.
+  // App Check Verification
   const appCheckToken = request.headers.get('X-Firebase-AppCheck');
   if (!appCheckToken) {
     return NextResponse.json({ error: 'App Check token not found.' }, { status: 401 });
@@ -30,35 +29,34 @@ export async function POST(request: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(firebase_token);
     const { uid, phone_number } = decodedToken;
 
-    // --- UPDATED AND SIMPLIFIED SUPABASE LOGIC ---
+    // --- FINAL SUPABASE LOGIC ---
     const { data: userProfile, error: upsertError } = await supabaseAdmin
-      .from('users') // Assumes your table is named 'users'
+      .from('users')
       .upsert(
         {
-          id: uid,              // The user's Firebase ID
+          // We now use the new 'firebase_uid' column to store the link to Firebase
+          firebase_uid: uid,
           phone_number: phone_number,
-          role: requestedRole,  // The role from the frontend
+          role: requestedRole,
         },
         {
-          onConflict: 'id', // Match users based on their Firebase ID
+          // This tells Supabase that 'firebase_uid' should be unique
+          onConflict: 'firebase_uid', 
         }
       )
-      // This now selects all columns directly from the 'users' table
-      .select('*') 
+      .select('*') // Select all data for the found or created user
       .single();
 
     if (upsertError) {
-      // If there's a database error, throw it
       console.error("Supabase upsert error:", upsertError);
       throw upsertError;
     }
     
-    // Return the real user profile from the database
     return NextResponse.json({ message: "Authentication successful", userProfile });
 
   } catch (error: any) {
-    console.error("API Error:", error);
     const errorMessage = error instanceof Error ? error.message : 'An internal error occurred.';
     return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
 }
+
