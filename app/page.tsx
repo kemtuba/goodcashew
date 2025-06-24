@@ -149,13 +149,13 @@ export default function HomePage() {
     }
   };
 
-  const handleVerifyCode = async () => {
+  // In /app/page.tsx
+const handleVerifyCode = async () => {
     if (code.length < 6) {
       setError("Please enter the 6‑digit code.");
       return;
     }
-    setError("");
-    setLoading(true);
+    setError(""); setLoading(true);
     try {
       if (!appCheck) throw new Error("AppCheck instance not found.");
       const appCheckTokenResponse = await getToken(appCheck, false);
@@ -168,28 +168,30 @@ export default function HomePage() {
       const firebaseToken = await firebaseUser.getIdToken(true);
       const response = await fetch("/api/firebase-auth", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Firebase-AppCheck": appCheckTokenResponse.token,
-        },
+        headers: { "Content-Type": "application/json", "X-Firebase-AppCheck": appCheckTokenResponse.token },
         body: JSON.stringify({ firebase_token: firebaseToken, role: selectedRole }),
       });
+      
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Failed to sync user profile.");
 
-      const userRole = data.userProfile?.role;
-      if (userRole) {
-        router.push(`/dashboard/${userRole}`);
+      // This is the robust redirect logic
+      const finalRole = data.userProfile?.role;
+      if (finalRole) {
+        console.log(`Login successful! Redirecting to /dashboard/${finalRole}`);
+        router.push(`/dashboard/${finalRole}`);
       } else {
-        router.push("/dashboard");
+         console.error("Role not found after login, redirecting to generic dashboard.");
+         router.push("/dashboard");
       }
+
     } catch (err: any) {
-      console.error("Error verifying code:", err);
+      console.error("Error during verification and redirect:", err);
       setError(err.message || "Failed to verify code.");
     } finally {
       setLoading(false);
     }
-  };
+};
 
   const roles = [
     { key: "farmer" as UserRole, label: "Farmer" },

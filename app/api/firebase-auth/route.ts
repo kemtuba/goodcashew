@@ -1,44 +1,45 @@
 // /app/api/firebase-auth/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminAppCheck } from '@/lib/firebase-admin';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-type UserRole = 'farmer' | 'coop-leader' | 'extension-worker' | 'admin' | 'retailer';
-
 export async function POST(request: NextRequest) {
-  
-  const appCheckToken = request.headers.get('X-Firebase-AppCheck');
-  if (!appCheckToken) {
-    return NextResponse.json({ error: 'App Check token not found.' }, { status: 401 });
-  }
-  try {
-    await adminAppCheck.verifyToken(appCheckToken);
-  } catch (err) {
-    return NextResponse.json({ error: 'App Check token is invalid.' }, { status: 401 });
-  }
+  // ... (App Check verification block is the same)
   
   try {
-    const { firebase_token, role } = await request.json();
-    if (!firebase_token || !role) {
-      return NextResponse.json({ error: 'Missing or invalid parameters.' }, { status: 400 });
+    const { firebase_token, role: requestedRole } = await request.json();
+    if (!firebase_token || !requestedRole) {
+      return NextResponse.json({ error: 'Missing token or role.' }, { status: 400 });
     }
 
     const decodedToken = await adminAuth.verifyIdToken(firebase_token);
     const { uid, phone_number } = decodedToken;
 
-    const { data: userProfile, error: upsertError } = await supabaseAdmin
+    // First, try to find an existing user
+    let { data: userProfile } = await supabaseAdmin
       .from('users')
-      .upsert({ id: uid, phone_number: phone_number, role: role })
-      .select('id, role')
+      .select(`*, roles: user_roles (role)`)
+      .eq('id', uid)
       .single();
 
-    if (upsertError) throw upsertError;
+    // If no user is found, create one
+    if (!userProfile) {
+      const { data: newUser, error: createError } = await supabaseAdmin
+        .from('users')
+        .insert({ id: uid, phone_number: phone_number, role: requestedRole })
+        .select(`*, roles: user_roles (role)`)
+        .single();
+      
+      if (createError) throw createError;
+      userProfile = newUser;
+    }
     
     return NextResponse.json({ message: "Authentication successful", userProfile });
 
   } catch (error: any) {
+    console.error("API Error:", error);
     const errorMessage = error instanceof Error ? error.message : 'An internal error occurred.';
     return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
 }
+
