@@ -1,32 +1,24 @@
 import admin from 'firebase-admin';
 import type { App } from 'firebase-admin/app';
 
-// This "singleton" pattern prevents re-initializing the app on every server call.
 if (!admin.apps.length) {
-  // Get the entire service account JSON from our single environment variable.
-  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  // THIS IS THE CODE THAT IS RUNNING NOW
+  // It uses the three separate, reliable variables.
+  const serviceAccount = {
+    projectId: process.env.FIREBASE_PROJECT_ID!,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+  };
 
-  if (!serviceAccountJson) {
-    throw new Error("The FIREBASE_SERVICE_ACCOUNT_JSON environment variable is not set.");
-  }
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+  console.log("Firebase Admin SDK initialized successfully.");
 
-  try {
-    // Parse the JSON string into an object that the Admin SDK can use.
-    const serviceAccount = JSON.parse(serviceAccountJson);
-
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    console.log("Firebase Admin SDK initialized successfully from single variable.");
-  } catch (error) {
-    console.error("Error parsing Firebase service account JSON or initializing app:", error);
-    // Throw an error to prevent the app from running with a bad configuration.
-    throw new Error("Could not initialize Firebase Admin SDK.");
-  }
 }
 
-// Export the initialized services for use in your API routes.
 const adminAuth = admin.auth();
 const adminAppCheck = admin.appCheck();
 
 export { adminAuth, adminAppCheck };
+
