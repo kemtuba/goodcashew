@@ -1,62 +1,35 @@
-'use client';
+// /app/(dashboard)/layout.tsx
 
-import { ReactNode, useState, useEffect } from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
-import { createContext } from 'react';
 
-// Shared UI components
-import { Header } from '@/components/sections/dashboard/Header';
-import { Sidebar } from '@/components/ui/sidebar';
-import { Spinner } from '@/components/ui/spinner';
-
-// Types
-import type { UserRole, Language } from '@/lib/types';
+// We are temporarily removing the Header and Sidebar to simplify the test
+// import { Header } from '@/components/sections/dashboard/Header';
+// import { Sidebar } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   const router = useRouter();
-
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [language, setLanguage] = useState<Language>('en');
-  const [loading, setLoading] = useState(true);
+  const [isSessionValid, setIsSessionValid] = useState<boolean | null>(null); // null = loading
 
   useEffect(() => {
-    const getSessionAndRole = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.push('/');
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-      if (error || !profile?.role) {
-        console.error('Profile/role not found, redirecting.', error);
-        router.push('/');
-      } else {
-        setUserRole(profile.role as UserRole);
-      }
-
-      setLoading(false);
-    };
-
-    getSessionAndRole();
-
-    // Listen for future auth changes (sign out, sign in)
+    console.log("DashboardLayout: Checking session...");
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        if (!session) {
+      (event, session) => {
+        if (session) {
+          // If a session exists, the check is successful.
+          console.log("DashboardLayout: SUCCESS - Session found. Granting access.");
+          setIsSessionValid(true);
+        } else {
+          // If no session, redirect to the homepage.
+          console.log("DashboardLayout: No session found. Redirecting...");
+          setIsSessionValid(false);
           router.push('/');
         }
       }
@@ -67,31 +40,12 @@ export default function DashboardLayout({
     };
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <Spinner />
-      </div>
-    );
+  // While checking the session, show a simple loading message.
+  if (isSessionValid === null) {
+    return <div className="h-screen w-full flex items-center justify-center">Loading session...</div>;
   }
 
-  if (!userRole) {
-    return null; // Still handling redirect in useEffect
-  }
-
-  return (
-    <div className="flex h-screen w-full bg-background">
-      <div className="hidden md:flex md:flex-shrink-0">
-        <Sidebar />
-      </div>
-
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header userRole={userRole} language={language} />
-
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  // If the session is valid, render the children (the dashboard page).
+  // Otherwise, render nothing while the redirect happens.
+  return isSessionValid ? <>{children}</> : null;
 }
