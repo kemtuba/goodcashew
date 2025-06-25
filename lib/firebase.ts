@@ -2,7 +2,10 @@
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from "firebase/app-check";
+// --- THIS IS THE FIX, PART 1 ---
+// We import the `getToken` function directly from the `firebase/app-check` package
+// so we can use and export it.
+import { initializeAppCheck, ReCaptchaV3Provider, AppCheck, getToken } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -33,5 +36,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Export the configured services
-export { auth, appCheck };
+// --- THIS IS THE FIX, PART 2 ---
+// We now explicitly export `getToken` alongside `auth` and `appCheck`.
+// This makes it available for import in your LoginPage component.
+export { auth, appCheck, getToken };
