@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-// --- THIS IS THE FIX, PART 1 ---
-// We now import `createClient` from the core Supabase library,
-// which gives us direct control over the headers.
 import { createClient } from '@supabase/supabase-js';
 import { Spinner } from '@/components/ui/spinner';
 import { Header } from '@/components/sections/dashboard/Header';
-import { Sidebar } from '@/components/ui/sidebar';
+// --- THIS IS THE FIX, PART 1 ---
+// We import the SidebarProvider alongside the Sidebar component.
+// I am assuming it is exported from the same file based on convention.
+import { Sidebar, SidebarProvider } from '@/components/ui/sidebar';
 import type { Language, UserRole } from '@/lib/types';
 
 type UserProfile = {
@@ -34,9 +34,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           const firebaseToken = await user.getIdToken();
 
           // STEP 2: Create a new Supabase client instance using the core library.
-          // This is the most critical part of the fix. We create a client
-          // and pass the Firebase token directly into its global headers.
-          // This tells Supabase to use this token for EVERY request this client makes.
           const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -50,7 +47,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           );
 
           // STEP 3: Use this new, authenticated client to fetch the user profile.
-          // The request will now have the `Authorization` header, and your RLS policy will work.
           const { data: profile, error } = await supabase
             .from('users')
             .select('id, full_name, role, phone_number')
@@ -91,18 +87,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex h-screen w-full bg-background">
-      <div className="hidden md:flex md:flex-shrink-0">
-        <Sidebar />
-      </div>
-      
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Header userName={userProfile.full_name} userRole={userProfile.role} language={language} />
+    // --- THIS IS THE FIX, PART 2 ---
+    // We wrap the entire dashboard layout with the SidebarProvider so that the
+    // useSidebar hook can access the context it needs.
+    <SidebarProvider>
+      <div className="flex h-screen w-full bg-background">
+        <div className="hidden md:flex md:flex-shrink-0">
+          <Sidebar />
+        </div>
         
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          {children}
-        </main>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Header userName={userProfile.full_name} userRole={userProfile.role} language={language} />
+          
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
