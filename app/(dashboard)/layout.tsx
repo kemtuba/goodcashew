@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-// EXPLANATION: We import useSupabaseClient for easier access to the client instance.
-import { useSupabaseClient } from '@supabase/auth-helpers-react';
+// --- THIS IS THE FIX, PART 1 ---
+// We now import `createClient` from the core Supabase library,
+// which gives us direct control over the headers.
+import { createClient } from '@supabase/supabase-js';
 import { Spinner } from '@/components/ui/spinner';
 import { Header } from '@/components/sections/dashboard/Header';
 import { Sidebar } from '@/components/ui/sidebar';
@@ -20,8 +22,6 @@ type UserProfile = {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  // Get the Supabase client instance via the hook.
-  const supabase = useSupabaseClient();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [language, setLanguage] = useState<Language>('en');
   const [loading, setLoading] = useState(true);
@@ -30,42 +30,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          // --- THIS IS THE CRITICAL FIX ---
-          // STEP 1: Get the Firebase JWT (ID token). This is the user's "ID card".
+          // STEP 1: Get the Firebase JWT (ID token).
           const firebaseToken = await user.getIdToken();
 
-          // STEP 2: Tell the Supabase client to use this token for its next requests.
-          // This "shows the ID card" to the Supabase Guard (RLS).
-          await supabase.auth.setSession({
-            access_token: firebaseToken,
-            refresh_token: firebaseToken, // For phone auth, access and refresh tokens can be the same
-          });
+          // STEP 2: Create a new Supabase client instance using the core library.
+          // This is the most critical part of the fix. We create a client
+          // and pass the Firebase token directly into its global headers.
+          // This tells Supabase to use this token for EVERY request this client makes.
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+              global: {
+                headers: {
+                  Authorization: `Bearer ${firebaseToken}`,
+                },
+              },
+            }
+          );
 
-          // STEP 3: Now that Supabase knows who we are, fetch the profile.
-          // This query will now succeed because the RLS policy will pass.
+          // STEP 3: Use this new, authenticated client to fetch the user profile.
+          // The request will now have the `Authorization` header, and your RLS policy will work.
           const { data: profile, error } = await supabase
             .from('users')
             .select('id, full_name, role, phone_number')
             .eq('id', user.uid)
             .single();
 
-          if (error) {
-            // This error will now be more specific if it happens (e.g., a real DB issue).
-            throw error;
-          }
+          if (error) throw error;
           
           if (profile) {
             setUserProfile(profile as UserProfile);
           } else {
-            // This case should be rare now, but it's good to have.
             throw new Error("Profile not found in database.");
           }
 
         } catch (error) {
-            console.error("Error setting session or fetching profile:", error);
-            router.push('/'); // If anything fails, log out.
+            console.error("Error fetching authenticated profile:", error);
+            router.push('/');
         }
-
       } else {
         router.push('/');
       }
@@ -73,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     });
 
     return () => unsubscribe();
-  }, [router, supabase]);
+  }, [router]);
 
   if (loading) {
     return (
