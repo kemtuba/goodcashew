@@ -179,10 +179,10 @@ const handleVerifyCode = async () => {
       const finalRole = data.userProfile?.role;
       if (finalRole) {
         console.log(`Login successful! Redirecting to /dashboard/${finalRole}`);
-        router.push(`/dashboard/${finalRole}`);
+        router.replace(`/dashboard/${finalRole}`);
       } else {
          console.error("Role not found after login, redirecting to generic dashboard.");
-         router.push("/dashboard");
+         router.replace("/dashboard");
       }
 
     } catch (err: any) {
