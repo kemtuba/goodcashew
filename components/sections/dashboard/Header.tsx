@@ -13,6 +13,7 @@ import type { UserRole, Language } from "@/lib/types";
 
 // The props this component accepts. UserRole and Language can be used for display.
 interface HeaderProps {
+  userName: string;
   language: Language;
   userRole: UserRole;
 }

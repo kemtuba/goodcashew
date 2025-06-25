@@ -35,4 +35,3 @@ if (typeof window !== 'undefined') {
 
 // Export the configured services
 export { auth, appCheck };
-
