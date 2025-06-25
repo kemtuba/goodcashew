@@ -60,4 +60,7 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+// --- THIS IS THE FIX ---
+// The Vercel build environment uses modern ES Modules, which require
+// `export default` instead of `module.exports`.
+export default nextConfig;
