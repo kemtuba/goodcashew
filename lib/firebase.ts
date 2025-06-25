@@ -1,8 +1,8 @@
-// lib/firebase.ts
+// /lib/firebase.ts
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from 'firebase/app-check';
+import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from "firebase/app-check";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -14,25 +14,25 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID!,
 };
 
-// Prevent reinitialization on Fast Refresh or SSR
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// Initialize Firebase Auth
+const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
-// Declare appCheck so it can be exported
 let appCheck: AppCheck | undefined;
-
 // Initialize App Check only in the browser
-if (typeof window !== 'undefined' && !(window as any). FIREBASE_APPCHECK_INITIALIZED) {
-  appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider(
-      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!
-    ),
-    isTokenAutoRefreshEnabled: true,
-  });
-  (window as any).FIREBASE_APPCHECK_INITIALIZED = true;
-  console.log('✅ Firebase App Check initialized');
+if (typeof window !== 'undefined') {
+  // Use a global flag to ensure this only runs once per page load
+  if (!(window as any).FIREBASE_APPCHECK_INITIALIZED) {
+    appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(
+        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!
+      ),
+      isTokenAutoRefreshEnabled: true,
+    });
+    (window as any).FIREBASE_APPCHECK_INITIALIZED = true;
+    console.log('✅ Firebase App Check initialized with v3 provider.');
+  }
 }
 
+// Export the configured services
 export { auth, appCheck };
+

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "code-verify-g73jh"
-  }
+    "default": "goodcashew-1bfe1",
+    "building": "goodcashew-1bfe1"
+  },
+  "targets": {},
+  "etags": {}
 }
