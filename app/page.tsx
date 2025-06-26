@@ -216,7 +216,7 @@ export default function LoginPage() {
       </div>
       
       <footer className="text-center text-xs text-gray-500 p-4 space-x-4">
-        <a href="https://www.risingstar-gh.org/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Rising Star Leadership Academy</a>
+        <a href="https://www.tirafanga.org/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Tirafanga Sustainability Alliance</a>
         <span>&bull;</span>
          <Dialog>
             <DialogTrigger asChild>
@@ -226,7 +226,7 @@ export default function LoginPage() {
                 <DialogHeader>
                     <DialogTitle>Contact Information</DialogTitle>
                 </DialogHeader>
-                <p>For inquiries about the Good Cashew program, please contact us at: <a href="mailto:info@goodcashew.app" className="text-amber-500 hover:underline">info@goodcashew.app</a></p>
+                <p>For inquiries about the Good Cashew program, please contact us at: <a href="mailto:me@kem.design" className="text-amber-500 hover:underline">me@kem.design</a></p>
             </DialogContent>
         </Dialog>
       </footer>
