@@ -1,0 +1,283 @@
+[debug] [2025-06-25T01:54:31.259Z] ----------------------------------------------------------------------
+[debug] [2025-06-25T01:54:31.261Z] Command:       /usr/local/bin/firebase /Users/kemartaylor/.cache/firebase/tools/lib/node_modules/firebase-tools/lib/bin/firebase emulators:start
+[debug] [2025-06-25T01:54:31.261Z] CLI Version:   12.4.7
+[debug] [2025-06-25T01:54:31.262Z] Platform:      darwin
+[debug] [2025-06-25T01:54:31.262Z] Node Version:  v16.16.0
+[debug] [2025-06-25T01:54:31.271Z] Time:          Wed Jun 25 2025 02:54:31 GMT+0100 (British Summer Time)
+[debug] [2025-06-25T01:54:31.271Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-06-25T01:54:33.112Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-06-25T01:54:33.116Z] > authorizing via signed-in user (me@kem.design)
+[info] i  emulators: Starting emulators: hosting {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: hosting"}}
+[debug] [2025-06-25T01:54:34.264Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[warn] ⚠  hosting: Hosting Emulator unable to start on port 5000, starting on 5002 instead. {"metadata":{"emulator":{"name":"hosting"},"message":"Hosting Emulator unable to start on port 5000, starting on 5002 instead."}}
+[debug] [2025-06-25T01:54:34.266Z] [hosting] Hosting Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-06-25T01:54:34.267Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5002}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-06-25T01:54:34.308Z] [hub] writing locator at /var/folders/jy/2n68bs8d2t3137k2ys45yydh0000gn/T/hub-goodcashew-1bfe1.json
+[debug] [2025-06-25T01:54:34.396Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/goodcashew-1bfe1/sites 
+[debug] [2025-06-25T01:54:35.702Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/goodcashew-1bfe1/sites 200
+[debug] [2025-06-25T01:54:35.704Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/goodcashew-1bfe1/sites {"sites":[{"name":"projects/goodcashew-1bfe1/sites/goodcashew-1bfe1","defaultUrl":"https://goodcashew-1bfe1.web.app","type":"DEFAULT_SITE"}]}
+[debug] [2025-06-25T01:54:35.707Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1/webApps/-/config [none]
+[debug] [2025-06-25T01:54:36.403Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1/webApps/-/config 200
+[debug] [2025-06-25T01:54:36.405Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1/webApps/-/config {"projectId":"goodcashew-1bfe1","appId":"1:408317212039:web:44bca52dfead8b63d60f22","storageBucket":"goodcashew-1bfe1.firebasestorage.app","apiKey":"AIzaSyAwbR754XRCOfzQAkAJsrVCIoVBZuSG7yk","authDomain":"goodcashew-1bfe1.firebaseapp.com","messagingSenderId":"408317212039","measurementId":"G-9277GXHXN9"}
+[debug] [2025-06-25T01:54:36.422Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1 [none]
+[debug] [2025-06-25T01:54:36.740Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1 200
+[debug] [2025-06-25T01:54:36.743Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/goodcashew-1bfe1 {"projectId":"goodcashew-1bfe1","projectNumber":"408317212039","displayName":"goodcashew","name":"projects/goodcashew-1bfe1","resources":{"hostingSite":"goodcashew-1bfe1"},"state":"ACTIVE","etag":"1_64cda5d3-acfb-4bd4-ab44-953407b97742"}
+[debug] [2025-06-25T01:54:36.746Z] Specified "public" directory "cashew" does not exist; Deploy to Hosting site "goodcashew-1bfe1" may fail or be empty.
+[info] i  hosting[goodcashew-1bfe1]: Serving hosting files from: cashew {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mcashew\u001b[22m"}}
+[info] ✔  hosting[goodcashew-1bfe1]: Local server: http://127.0.0.1:5002 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5002\u001b[22m\u001b[24m"}}
+[warn] ⚠  emulators: The Emulator UI is not starting, either because none of the running emulators have a UI component or the Emulator UI cannot determine the Project ID. Pass the --project flag to specify a project. {"metadata":{"emulator":{"name":"hub"},"message":"The Emulator UI is not starting, either because none of the running emulators have a UI component or the Emulator UI cannot determine the Project ID. Pass the --project flag to specify a project."}}
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+└─────────────────────────────────────────────────────────────┘
+
+┌──────────┬────────────────┐
+│ Emulator │ Host:Port      │
+├──────────┼────────────────┤
+│ Hosting  │ 127.0.0.1:5002 │
+└──────────┴────────────────┘
+  Emulator Hub running at 127.0.0.1:4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[info] i  hosting: 127.0.0.1 - - [25/Jun/2025:01:54:49 +0000] "GET / HTTP/1.1" 404 139 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" {"metadata":{"emulator":{"name":"hosting"},"message":"127.0.0.1 - - [25/Jun/2025:01:54:49 +0000] \"GET / HTTP/1.1\" 404 139 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36\""}}
+[debug] [2025-06-25T01:56:08.075Z] Received signal SIGHUP 1
+[info]  
+[info] i  emulators: Received SIGHUP for the first time. Starting a clean shutdown. 
+[info] i  emulators: Please wait for a clean shutdown or send the SIGHUP signal again to stop right now. 
+[debug] [2025-06-25T01:56:08.147Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.154Z] Ignoring signal SIGHUP due to short delay of 81ms
+[debug] [2025-06-25T01:56:08.155Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.158Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.160Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.163Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.167Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.170Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.172Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.174Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.178Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.178Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.182Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.184Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.185Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.186Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.189Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.207Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
+[error] Error: An unexpected error has occurred.
+[debug] [2025-06-25T01:56:08.208Z] Error: write EIO
+    at afterWriteDispatched (node:internal/stream_base_commons:160:15)
+    at writeGeneric (node:internal/stream_base_commons:151:3)
+    at WriteStream.Socket._writeGeneric (node:net:817:11)
+    at WriteStream.Socket._write (node:net:829:8)
+    at writeOrBuffer (node:internal/streams/writable:389:12)
+    at _write (node:internal/streams/writable:330:10)
+    at WriteStream.Writable.write (node:internal/streams/writable:334:10)
+    at Console.log (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston/lib/winston/transports/console.js:79:23)
+    at Console._write (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/winston-transport/index.js:103:17)
+    at doWrite (/Users/kemartaylor/.cache/firebase/tools/lib/node_modules/readable-stream/lib/_stream_writable.js:390:139)
+[error] 
