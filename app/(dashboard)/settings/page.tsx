@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient';
+// --- FIX: We will use our custom context hook to get the authenticated Supabase client ---
+import { useSupabase } from '../supabase-context'; 
 import { Globe, User, Bell, Info } from "lucide-react";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-
 import type { Language, UserRole } from "@/lib/types";
 
-// Type definition for a single translation set
+// --- FIX: Invalid keys like 'lead-farmer' must be enclosed in quotes ---
 type TranslationSet = {
   title: string;
   language: string;
@@ -25,106 +25,111 @@ type TranslationSet = {
   coopLeader: string;
   admin: string;
   retailer: string;
+  "lead-farmer": string; // Enclosed in quotes
+  "school-liaison": string; // Enclosed in quotes
   english: string;
   twi: string;
   nafana: string;
   french: string;
 };
 
-// Complete translations object to satisfy TypeScript types
+// --- FIX: Added the missing roles to each language with placeholder text ---
 const translations: Record<Language, TranslationSet> = {
   en: {
-    title: "Settings", language: "Language", userRole: "Switch Role", notifications: "Notifications",
+    title: "Settings", language: "Language", userRole: "Your Role", notifications: "Notifications",
     about: "About GoodCashew", version: "Version 1.0.0", currentRole: "Current Role",
     farmer: "Farmer", extensionWorker: "Extension Worker", coopLeader: "Cooperative Leader",
-    admin: "Administrator", retailer: "Retailer", english: "English", twi: "Twi",
-    nafana: "Nafana", french: "French",
+    admin: "Administrator", retailer: "Retailer", "lead-farmer": "Lead Farmer", "school-liaison": "School Liaison",
+    english: "English", twi: "Twi", nafana: "Nafana", french: "French",
   },
   twi: {
-    title: "Nhyehyɛe", language: "Kasa", userRole: "Sesa Dwumadi", notifications: "Amanneɛbɔ",
+    title: "Nhyehyɛe", language: "Kasa", userRole: "Wo Dwumadi", notifications: "Amanneɛbɔ",
     about: "GoodCashew Ho Nsɛm", version: "Nkyerɛwde 1.0.0", currentRole: "Dwumadi a Woyɛ",
     farmer: "Okuafo", extensionWorker: "Mmoa Adwumayɛfo", coopLeader: "Kuo Kannifo",
-    admin: "Ɔhwɛfo", retailer: "Retailer", english: "Borɔfo Kasa", twi: "Twi",
-    nafana: "Nafana", french: "Frɛnkye Kasa",
+    admin: "Ɔhwɛfo", retailer: "Retailer", "lead-farmer": "Lead Farmer", "school-liaison": "School Liaison",
+    english: "Borɔfo Kasa", twi: "Twi", nafana: "Nafana", french: "Frɛnkye Kasa",
   },
   nafana: {
-    title: "Yεlεni", language: "Kasa", userRole: "Sesa Tuma", notifications: "Amanneεbɔ",
+    title: "Yεlεni", language: "Kasa", userRole: "Wo Tuma", notifications: "Amanneεbɔ",
     about: "GoodCashew Ho Nsεm", version: "Nkyerεwde 1.0.0", currentRole: "Tuma a Woyε",
     farmer: "Kuoro", extensionWorker: "Dεmε Tumani", coopLeader: "Kuo Yεlεni",
-    admin: "Yεlεni Kεsε", retailer: "Retailer", english: "Borɔfo Kasa", twi: "Twi",
-    nafana: "Nafana", french: "Frεnkye Kasa",
+    admin: "Yεlεni Kεsε", retailer: "Retailer", "lead-farmer": "Lead Farmer", "school-liaison": "School Liaison",
+    english: "Borɔfo Kasa", twi: "Twi", nafana: "Nafana", french: "Frεnkye Kasa",
   },
   fr: {
-    title: "Paramètres", language: "Langue", userRole: "Changer Rôle", notifications: "Notifications",
+    title: "Paramètres", language: "Langue", userRole: "Votre Rôle", notifications: "Notifications",
     about: "À Propos de GoodCashew", version: "Version 1.0.0", currentRole: "Rôle Actuel",
     farmer: "Agriculteur", extensionWorker: "Agent de Vulgarisation", coopLeader: "Leader Coopératif",
-    admin: "Administrateur", retailer: "Détaillant", english: "Anglais", twi: "Twi",
-    nafana: "Nafana", french: "Français",
+    admin: "Administrateur", retailer: "Détaillant", "lead-farmer": "Agriculteur Principal", "school-liaison": "Liaison Scolaire",
+    english: "Anglais", twi: "Twi", nafana: "Nafana", french: "Français",
   },
 };
 
 export default function SettingsPage() {
   const router = useRouter();
+  // --- FIX: Use our authenticated context hook ---
+  const supabase = useSupabase(); 
 
   const [language, setLanguage] = useState<Language>("en");
-  const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
-  const [availableRoles, setAvailableRoles] = useState<UserRole[]>([]);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   const t = translations[language];
 
   useEffect(() => {
+    // Don't run the effect if the authenticated client isn't ready yet.
+    if (!supabase) return;
+
     const fetchUserProfile = async () => {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      // --- FIX: We now use the authenticated client provided by the layout ---
+      // This automatically respects RLS policies.
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
         router.push('/'); 
         return;
       }
 
-      // NOTE: Replace 'profiles' with your actual Supabase table name for user profiles
+      // --- FIX: Query the correct 'users' table and 'role' column ---
       const { data: profile, error } = await supabase
-        .from('profiles') 
-        .select('roles')
-        .eq('id', session.user.id)
+        .from('users') 
+        .select('role')
+        .eq('id', user.id)
         .single();
 
       if (error) {
         console.error("Error fetching user profile:", error);
-      }
-      
-      if (profile && profile.roles && profile.roles.length > 0) {
-        // Sets the current role and the list of roles available to switch to
-        setCurrentRole(profile.roles[0]); 
-        setAvailableRoles(profile.roles);
+      } else if (profile) {
+        setUserRole(profile.role as UserRole);
       }
       setLoading(false);
     };
     fetchUserProfile();
-  }, [router]);
+  }, [supabase, router]);
 
-  const handleRoleChange = (newRoleValue: string) => {
-    const newRole = newRoleValue as UserRole;
-    if (newRole && newRole !== currentRole) {
-      setCurrentRole(newRole);
-      // In a real app, you might make an API call to update the user's session
-      // then use router.refresh() to reload server components with the new role.
-      console.log(`Switched to role: ${newRole}`);
-    }
-  };
 
   if (loading) {
-    return <div className="p-8 text-center">Loading settings...</div>;
+    return (
+        <div className="space-y-6 p-4 md:p-8">
+            <Skeleton className="h-10 w-1/3" />
+            <Card><CardHeader><Skeleton className="h-24 w-full" /></CardHeader></Card>
+            <Card><CardHeader><Skeleton className="h-24 w-full" /></CardHeader></Card>
+        </div>
+    );
   }
-
+  
+  // --- FIX: Create a complete map of roles to labels ---
   const roleLabels: Record<UserRole, string> = {
     farmer: t.farmer,
     "extension-worker": t.extensionWorker,
     "coop-leader": t.coopLeader,
     admin: t.admin,
     retailer: t.retailer,
+    "lead-farmer": t["lead-farmer"],
+    "school-liaison": t["school-liaison"],
   };
-  
+
   return (
     <div className="space-y-6 p-4 md:p-8">
       <div>
@@ -154,35 +159,22 @@ export default function SettingsPage() {
           </Select>
         </CardContent>
       </Card>
-
-      {availableRoles.length > 1 && (
-        <Card>
-          <CardHeader>
+      
+      {/* --- SIMPLIFIED: Role display (switching roles is a more complex feature) --- */}
+      <Card>
+        <CardHeader>
             <div className="flex items-center gap-3">
                 <User className="h-5 w-5 text-muted-foreground" />
                 <CardTitle>{t.userRole}</CardTitle>
             </div>
-            <CardDescription>
-              Your current role is **{currentRole ? roleLabels[currentRole] : '...'}**. 
-              Switch between your available roles.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Select onValueChange={handleRoleChange} defaultValue={currentRole || undefined}>
-              <SelectTrigger className="w-full md:w-1/2">
-                <SelectValue placeholder="Select a role to switch to" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableRoles.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {roleLabels[role]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      )}
+          <CardDescription>This is your currently active role in the program.</CardDescription>
+        </CardHeader>
+        <CardContent>
+           <p className="font-semibold p-3 border rounded-md bg-muted w-full md:w-1/2">
+             {userRole ? roleLabels[userRole] : 'Loading...'}
+           </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
