@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-// --- FIX: We import the core `createClient` function to have direct control ---
-import { createClient } from '@supabase/supabase-js';
+import { useSupabase } from "@/app/(dashboard)/supabase-context";
 import { Users, TrendingUp, Edit, Search, GraduationCap, Award, School, MapPin, Target, ShieldCheck, BarChart3, DollarSign } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
@@ -12,6 +11,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton";
+// --- THIS IS THE FIX, PART 1: Import the Select component for mobile navigation ---
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   ResponsiveContainer,
   LineChart,
@@ -35,10 +42,9 @@ interface UserRecord {
   is_rsla_parent: boolean;
   location?: string;
   certification_status?: string;
-  last_seen?: string;
 }
 
-// The initial static data can serve as a default or for UI development
+// Re-using your excellent data structure for type definition
 const initialProgramData = {
   kpis: {
     totalFarmers: 0,
@@ -59,96 +65,116 @@ const initialProgramData = {
     longTerm: { sustainableEconomicDevelopment: 0, educationalAttainment: 0, landOwnershipSecured: 0 },
   },
   schoolPartnership: { studentsAffected: 0, parentFarmersInProgram: 0, facilityImprovements: 0, teacherTrainingHours: 0, feePaymentConsistency: 0},
-  communityDevelopment: [] as any[],
+  communityDevelopment: [] as { name: string; value: number; target: number }[],
   financials: { totalBudget: 150000, stipendsDisbursed: 0, certificationSupport: 0, schoolInvestments: 0, communityDevelopment: 0, duesCollected: 0, organicPremiumEarned: 0},
 };
 
-// --- FIX: The type is now correctly derived from the `initialProgramData` constant. ---
 type ProgramData = typeof initialProgramData;
 
+const TABS = [
+    { value: "overview", label: "Program Overview" },
+    { value: "outcomes", label: "Theory of Change" },
+    { value: "education", label: "School Partnership" },
+    { value: "community", label: "Community Impact" },
+]
 
 export default function EnhancedAdminDashboard() {
-  // --- REMOVED: `useSupabaseClient()` is removed to avoid dependency on the helper library. ---
-  const [programData, setProgramData] = useState<ProgramData>(initialProgramData);
+  const supabase = useSupabase();
+  const [programData, setProgramData] = useState<ProgramData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
+    if (!supabase) return;
+
     const fetchAdminData = async () => {
       try {
         setLoading(true);
-
-        // We create the client directly here, ensuring it has the correct context.
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        );
         
+        // This query is designed to fetch ALL users.
         const { data: users, error: usersError } = await supabase.from('users').select('*');
-
+        
         if (usersError) throw usersError;
 
-        // --- FIX: Explicitly type the 'u' parameter in array methods ---
-        const totalFarmers = users.filter((u: UserRecord) => u.role === 'farmer' || u.role === 'lead-farmer').length;
-        const parentFarmersInProgram = users.filter((u: UserRecord) => u.is_rsla_parent).length; 
+        if (!users || users.length === 0) {
+            console.warn(
+              "Admin Dashboard Warning: The query for users returned 0 rows. " +
+              "This is likely because the currently logged-in user does not have the 'admin' role in the 'users' table. " +
+              "Please check your user record in the Supabase table editor to ensure the role is set correctly."
+            );
+        }
 
-        const fetchedData = {
-            ...initialProgramData,
-            kpis: {
-                ...initialProgramData.kpis,
-                totalFarmers: totalFarmers,
-                organicCertificationRate: 43, 
-                averageYieldIncrease: 18,
-                schoolFeePaymentRate: 89,
-            },
-            // --- FIX: Explicitly type the 'u' parameter in array methods ---
-            users: users.map((u: UserRecord) => ({
-                name: u.full_name,
-                role: u.role,
-                location: u.location || 'Kabile',
-                certificationStatus: u.certification_status || 'pending',
-                lastActive: '1h ago', // This would come from a `last_seen` timestamp
-            })),
-            schoolPartnership: {
-                ...initialProgramData.schoolPartnership,
-                parentFarmersInProgram: parentFarmersInProgram,
-            }
+        const totalFarmers = users.filter((u: UserRecord) => u.role === 'farmer' || u.role === 'lead-farmer').length;
+        const certifiedFarmers = users.filter((u: UserRecord) => u.certification_status === 'certified').length;
+        const organicCertificationRate = totalFarmers > 0 ? Math.round((certifiedFarmers / totalFarmers) * 100) : 0;
+        
+        const liveData: ProgramData = {
+          ...initialProgramData,
+          kpis: {
+            ...initialProgramData.kpis,
+            totalFarmers: totalFarmers,
+            organicCertificationRate: organicCertificationRate,
+            averageYieldIncrease: 18, 
+            schoolFeePaymentRate: 89,
+          },
+          users: users.map((u: UserRecord) => ({
+            name: u.full_name,
+            role: u.role,
+            location: u.location || 'Kabile',
+            certificationStatus: u.certification_status || 'pending',
+            lastActive: '1h ago', 
+          })),
+          agriculturalImpact: [
+            { month: "Jan", yield: 450, organicCertified: 15 },
+            { month: "Feb", yield: 465, organicCertified: 22 },
+            { month: "Mar", yield: 480, organicCertified: 28 },
+            { month: "Apr", yield: 510, organicCertified: 35 },
+            { month: "May", yield: 515, organicCertified: 39 },
+            { month: "Jun", yield: 520, organicCertified: 43 },
+          ],
+           educationalImpact: [
+            { month: "Jan", attendance: 82, feePayment: 75, performance: 78 },
+            { month: "Feb", attendance: 84, feePayment: 78, performance: 80 },
+            { month: "Mar", attendance: 86, feePayment: 82, performance: 82 },
+            { month: "Apr", attendance: 87, feePayment: 85, performance: 84 },
+            { month: "May", attendance: 88, feePayment: 87, performance: 86 },
+            { month: "Jun", attendance: 89, feePayment: 89, performance: 88 },
+          ],
+           communityDevelopment: [
+            { name: "Land Ownership Secured", value: 22, target: 50 },
+            { name: "Cooperative Membership", value: 68, target: 80 },
+          ],
         };
 
-        setProgramData(fetchedData);
-
+        setProgramData(liveData);
       } catch (err: any) {
+        setError("Could not load program data. Please check RLS policies and network connection.");
         console.error("Failed to fetch admin dashboard data:", err);
-        setError("Could not load program data. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAdminData();
-  }, []); // The dependency array can be empty as the client is created inside.
+  }, [supabase]);
 
   if (loading) {
     return (
         <div className="space-y-8">
-            <Skeleton className="h-12 w-1/2" />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-32 w-full" />
-            </div>
-            <div className="grid gap-6 lg:grid-cols-2">
-                <Skeleton className="h-80 w-full" />
-                <Skeleton className="h-80 w-full" />
-            </div>
+            <Skeleton className="h-12 w-full max-w-lg" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>
+            <div className="grid gap-6 lg:grid-cols-2"><Skeleton className="h-80 w-full" /><Skeleton className="h-80 w-full" /></div>
         </div>
     );
   }
 
   if (error) {
     return <div className="text-center text-red-500 bg-red-100 p-4 rounded-md">{error}</div>;
+  }
+  
+  if (!programData) {
+    return <div>No program data available.</div>;
   }
 
   return (
@@ -162,31 +188,51 @@ export default function EnhancedAdminDashboard() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Program Overview</TabsTrigger>
-          <TabsTrigger value="outcomes">Theory of Change</TabsTrigger>
-          <TabsTrigger value="education">School Partnership</TabsTrigger>
-          <TabsTrigger value="community">Community Impact</TabsTrigger>
+        {/* --- THIS IS THE FIX, PART 2: Responsive Tab Navigation --- */}
+        {/* This TabsList is visible on medium screens and up */}
+        <TabsList className="hidden md:grid w-full grid-cols-4">
+          {TABS.map(tab => <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>)}
         </TabsList>
+        {/* This Select dropdown is visible only on small screens */}
+        <div className="md:hidden">
+            <Select onValueChange={setActiveTab} value={activeTab}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a view" />
+                </SelectTrigger>
+                <SelectContent>
+                    {TABS.map(tab => <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>)}
+                </SelectContent>
+            </Select>
+        </div>
 
         <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Active Farmers</CardTitle>
                     <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
+                  </CardHeader>
+                  <CardContent>
                     <div className="text-2xl font-bold">{programData.kpis.totalFarmers}</div> 
-                    <p className="text-xs text-muted-foreground">90% of RSLA parents</p>
-                </CardContent>
+                    <p className="text-xs text-muted-foreground">Pre-registered program members</p>
+                  </CardContent>
                 </Card>
-                {/* The rest of your impressive UI would follow here... */}
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Organic Certified</CardTitle>
+                    <Award className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{programData.kpis.organicCertificationRate}%</div>
+                    <p className="text-xs text-muted-foreground">Target: 50% by year 2</p>
+                  </CardContent>
+                </Card>
+                {/* Other KPI cards would follow... */}
             </div>
+            {/* Other overview content... */}
         </TabsContent>
-        {/* ... other TabsContent sections ... */}
+        {/* Other TabsContent sections... */}
       </Tabs>
-
     </div>
   )
 }
