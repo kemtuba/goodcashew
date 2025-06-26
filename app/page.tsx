@@ -7,7 +7,8 @@ import { auth, appCheck, getToken } from '@/lib/firebase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Check, AlertCircle, Users, School, Heart } from "lucide-react";
+// --- UPDATED ICONS ---
+import { Check, AlertCircle, Users, GraduationCap, Leaf } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 // --- UI COMPONENTS ---
@@ -32,23 +33,23 @@ const GoodCashewLogo = () => (
   </div>
 );
 
-// --- NEW: Engaging Info Panel with Rotating Slides ---
+// --- REFINED: Info Panel with new copy, icons, and centered logo ---
 const InfoPanel = () => {
     const slides = [
         {
-            icon: Heart,
+            icon: Leaf,
             title: "Empowering Farmers, Uplifting Communities.",
-            subtitle: "A partnership fostering sustainable agriculture and educational excellence in Jaman North."
+            subtitle: "" // Subtitle removed for conciseness
         },
         {
             icon: Users,
-            title: "72",
-            subtitle: "Families currently supported by the Good Cashew program."
+            title: "Supporting 72 Farmer Families",
+            subtitle: "through training, certification, and financial stability."
         },
         {
-            icon: School,
-            title: "156",
-            subtitle: "Students at the Rising Star Leadership Academy benefiting from improved family stability."
+            icon: GraduationCap,
+            title: "Empowering 156 Students",
+            subtitle: "at the Rising Star Leadership Academy through our partnership."
         }
     ];
 
@@ -57,7 +58,7 @@ const InfoPanel = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setIndex((prevIndex) => (prevIndex + 1) % slides.length);
-        }, 5000); // Rotate every 5 seconds
+        }, 5000);
         return () => clearInterval(timer);
     }, [slides.length]);
     
@@ -67,7 +68,8 @@ const InfoPanel = () => {
         <div className="relative w-full h-full flex flex-col items-center justify-center rounded-lg overflow-hidden bg-zinc-800/30 p-8 text-center text-white">
             <div className="absolute inset-0 bg-gradient-to-b from-gray-500/10 to-gray-500/0" />
             
-            <div className="absolute top-8 left-8">
+            {/* Logo is now part of the main centered content */}
+            <div className="mb-8">
                 <GoodCashewLogo />
             </div>
 
@@ -80,9 +82,9 @@ const InfoPanel = () => {
                     transition={{ duration: 0.5 }}
                     className="flex flex-col items-center justify-center gap-4"
                 >
-                    <CurrentIcon className="h-16 w-16 text-amber-400" strokeWidth={1.5}/>
-                    <h2 className="text-3xl font-bold">{slides[index].title}</h2>
-                    <p className="text-lg text-gray-300 max-w-sm">{slides[index].subtitle}</p>
+                    <CurrentIcon className="h-12 w-12 text-amber-400" strokeWidth={1.5}/>
+                    <h2 className="text-2xl font-bold">{slides[index].title}</h2>
+                    <p className="text-md text-gray-300 max-w-xs">{slides[index].subtitle}</p>
                 </motion.div>
             </AnimatePresence>
         </div>
@@ -159,10 +161,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-zinc-900 to-stone-900">
-      <div className="w-full max-w-sm md:max-w-4xl flex flex-col md:flex-row md:items-center rounded-xl overflow-hidden bg-stone-800/30 shadow-2xl">
+      <div className="w-full max-w-sm md:max-w-4xl flex flex-col md:flex-row md:items-stretch rounded-xl overflow-hidden bg-stone-800/30 shadow-2xl">
         
+        {/* --- REFINED: The Info Panel with responsive height --- */}
         <div className="w-full md:w-1/2">
-          <div className="w-full h-64 md:h-[500px] md:aspect-auto aspect-video">
+          <div className="w-full h-80 md:h-full">
             <InfoPanel />
           </div>
         </div>
