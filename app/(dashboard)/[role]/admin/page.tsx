@@ -180,11 +180,11 @@ export default function EnhancedAdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Good Cashew Program Administration</h1>
-        <p className="text-muted-foreground">
-          Comprehensive dashboard tracking progress toward empowering cashew farmers, improving educational outcomes,
-          and driving sustainable community development in Jaman North District.
-        </p>
+        <h1 className="text-3xl font-bold">GoodCashew Admin Dashboard</h1>
+<p className="text-muted-foreground">
+  Monitor progress across farmer support, education, and sustainability in Jaman North.
+</p>
+
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
