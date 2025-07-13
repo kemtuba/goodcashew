@@ -19,7 +19,7 @@ const GoodCashewLogo = () => (
   // Using next/image for optimized loading and referencing our official SVG file.
   // This is cleaner and ensures we are always using the correct brand asset.
   <Image
-    src="/goodcashew-final/app/goodcashew-primarylogo.svg"
+    src="/goodcashew-primarylogo.svg"
     alt="goodCashew Logo"
     width={250} // Increased size to be the hero element
     height={40} // Adjusted height based on new width
