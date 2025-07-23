@@ -2,10 +2,10 @@
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-// --- THIS IS THE FIX, PART 1 ---
-// We import the `getToken` function directly from the `firebase/app-check` package
-// so we can use and export it.
+// --- THIS LINE IS THE FIX ---
+// The import path has been corrected from "firebase-app-check" to "firebase/app-check"
 import { initializeAppCheck, ReCaptchaV3Provider, AppCheck, getToken } from "firebase/app-check";
+
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -21,9 +21,9 @@ const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : get
 const auth = getAuth(app);
 
 let appCheck: AppCheck | undefined;
+
 // Initialize App Check only in the browser
 if (typeof window !== 'undefined') {
-  // Use a global flag to ensure this only runs once per page load
   if (!(window as any).FIREBASE_APPCHECK_INITIALIZED) {
     appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(
@@ -32,11 +32,8 @@ if (typeof window !== 'undefined') {
       isTokenAutoRefreshEnabled: true,
     });
     (window as any).FIREBASE_APPCHECK_INITIALIZED = true;
-    console.log('✅ Firebase App Check initialized with v3 provider.');
+    console.log('✅ Firebase App Check initialized.');
   }
 }
 
-// --- THIS IS THE FIX, PART 2 ---
-// We now explicitly export `getToken` alongside `auth` and `appCheck`.
-// This makes it available for import in your LoginPage component.
 export { auth, appCheck, getToken };

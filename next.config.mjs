@@ -21,10 +21,10 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com",
+              // --- THIS LINE IS THE FIX ---
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://apis.google.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://placehold.co https://images.unsplash.com",
-              // The fix for your font error: add `data:`
               "font-src 'self' data:",
               `connect-src 'self' https://www.google.com https://*.googleapis.com https://*.firebaseapp.com ${supabaseHostname ? `https://${supabaseHostname}` : ''}`,
               "frame-src 'self' https://www.google.com",
