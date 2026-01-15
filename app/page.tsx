@@ -159,7 +159,7 @@ export default function LoginPage() {
         </div>
       </div>
       <footer className="text-center text-xs text-gray-500 p-4 space-x-4">
-        <a href="https://www.tirafanga.org/" target="_blank" rel="noopener noreferrer" className="hover:text-white">Tirafanga Sustainability Alliance</a>
+        <a href="https://pathtoimpact.us" target="_blank" rel="noopener noreferrer" className="hover:text-white">pathtoimpact</a>
         <span>&bull;</span>
          <Dialog>
             <DialogTrigger asChild>
